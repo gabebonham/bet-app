@@ -1,0 +1,35 @@
+Resultados do modelo para PREMIER:
+Acurácia: 76.25%
+
+Relatório de classificação:
+              precision    recall  f1-score   support
+
+         0.0       0.83      0.87      0.85        62
+         1.0       0.47      0.39      0.42        18
+
+    accuracy                           0.76        80
+   macro avg       0.65      0.63      0.64        80
+weighted avg       0.75      0.76      0.75        80
+
+Matriz de confusão:
+[[54  8]
+ [11  7]]
+
+Importância das features:
+Vizinho_1: 3.57%
+Vizinho_2: 3.61%
+Vizinho_3: 3.63%
+Vizinho_4: 4.27%
+Vizinho_5: 4.00%
+Vizinho_6: 4.39%
+Vizinho_7: 4.14%
+Vizinho_8: 2.89%
+Media_Linha: 15.49%
+Media_Coluna: 19.04%
+Tendencia_Linha: 10.41%
+Tendencia_Coluna: 8.27%
+Proporcao_Global: 0.00%
+Alternancia: 9.71%
+Ciclo_3h: 3.28%
+Ciclo_6h: 2.42%
+Ciclo_12h: 0.88%

@@ -1,0 +1,12 @@
+{
+    "stake": {
+        "ALTA": 25.0,
+        "MEDIA": 15.0,
+        "BAIXA": 5.0
+    },
+    "niveis_confianca": {
+        "ALTA": 0.7,
+        "MEDIA": 0.6,
+        "BAIXA": 0.5
+    }
+}

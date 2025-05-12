@@ -1,0 +1,3 @@
+[submodule "bet-bot"]
+	path = bet-bot
+	url = https://github.com/gabebonham/bet-bot

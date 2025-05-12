@@ -1,0 +1,115 @@
+RECOMENDAÇÕES PARA AS PRÓXIMAS 5 HORAS A PARTIR DA HORA 19 (ESTRATÉGIA MARTINGALE)
+==========================================================================
+
+HORA 20:
+---------
+Opção 1: Campeonato 4 (COPA 04) - Probabilidade: 0.1100
+   Histórico: 46/141 (32.62%) jogos com BTTS
+   Últimos 5 resultados: XXVVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 2: Campeonato 13 (COPA 13) - Probabilidade: 0.1100
+   Histórico: 31/141 (21.99%) jogos com BTTS
+   Últimos 5 resultados: XVXXV
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 3: Campeonato 16 (COPA 16) - Probabilidade: 0.1100
+   Histórico: 41/141 (29.08%) jogos com BTTS
+   Últimos 5 resultados: VXXVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+HORA 21:
+---------
+Opção 1: Campeonato 4 (COPA 04) - Probabilidade: 0.1100
+   Histórico: 46/141 (32.62%) jogos com BTTS
+   Últimos 5 resultados: XXVVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 2: Campeonato 13 (COPA 13) - Probabilidade: 0.1100
+   Histórico: 31/141 (21.99%) jogos com BTTS
+   Últimos 5 resultados: XVXXV
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 3: Campeonato 16 (COPA 16) - Probabilidade: 0.1100
+   Histórico: 41/141 (29.08%) jogos com BTTS
+   Últimos 5 resultados: VXXVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+HORA 22:
+---------
+Opção 1: Campeonato 4 (COPA 04) - Probabilidade: 0.1100
+   Histórico: 46/141 (32.62%) jogos com BTTS
+   Últimos 5 resultados: XXVVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 2: Campeonato 13 (COPA 13) - Probabilidade: 0.1100
+   Histórico: 31/141 (21.99%) jogos com BTTS
+   Últimos 5 resultados: XVXXV
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 3: Campeonato 16 (COPA 16) - Probabilidade: 0.1100
+   Histórico: 41/141 (29.08%) jogos com BTTS
+   Últimos 5 resultados: VXXVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+HORA 23:
+---------
+Opção 1: Campeonato 4 (COPA 04) - Probabilidade: 0.1100
+   Histórico: 46/141 (32.62%) jogos com BTTS
+   Últimos 5 resultados: XXVVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 2: Campeonato 13 (COPA 13) - Probabilidade: 0.1100
+   Histórico: 31/141 (21.99%) jogos com BTTS
+   Últimos 5 resultados: XVXXV
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 3: Campeonato 16 (COPA 16) - Probabilidade: 0.1100
+   Histórico: 41/141 (29.08%) jogos com BTTS
+   Últimos 5 resultados: VXXVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+HORA 0:
+---------
+Opção 1: Campeonato 4 (COPA 04) - Probabilidade: 0.1100
+   Histórico: 46/141 (32.62%) jogos com BTTS
+   Últimos 5 resultados: XXVVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 2: Campeonato 13 (COPA 13) - Probabilidade: 0.1100
+   Histórico: 31/141 (21.99%) jogos com BTTS
+   Últimos 5 resultados: XVXXV
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+Opção 3: Campeonato 16 (COPA 16) - Probabilidade: 0.1100
+   Histórico: 41/141 (29.08%) jogos com BTTS
+   Últimos 5 resultados: VXXVX
+   Padrões recentes: Diagonal 
+   Confiança: BAIXA
+
+
+ESTRATÉGIA MARTINGALE RECOMENDADA:
+------------------------------
+1. Comece apostando no campeonato com maior probabilidade em cada hora
+2. Se perder, passe para o segundo campeonato com maior probabilidade
+3. Se perder novamente, passe para o terceiro campeonato com maior probabilidade
+4. Priorize campeonatos com padrões geométricos recentes (retângulos e diagonais)
+5. Evite campeonatos com sequências de 3 ou mais resultados iguais consecutivos
+6. Para maior segurança, considere apenas previsões com confiança MÉDIA ou ALTA
+
+NOTA: Esta estratégia foi otimizada para alcançar pelo menos 2 acertos por hora em 3 tentativas usando Martingale.
+      Recomenda-se acompanhar os resultados e ajustar a estratégia conforme necessário.

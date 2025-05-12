@@ -1,0 +1,82 @@
+PREVISÕES NO FORMATO DA TABELA ORIGINAL
+======================================
+
+HORA | CAMPEONATO | COLUNA | MERCADO | PROBABILIDADE | CONFIANÇA | STAKE
+---------------------------------------------------------------------------
+20 | COPA 7 | 3 | BTTS | 0.72 | MÉDIA | R$10,00
+20 | COPA 37 | 13 | BTTS | 0.71 | MÉDIA | R$10,00
+20 | COPA 22 | 8 | BTTS | 0.57 | BAIXA | R$5,00
+20 | EURO 14 | 5 | BTTS | 0.86 | ALTA | R$20,00
+20 | EURO 35 | 12 | BTTS | 0.86 | ALTA | R$20,00
+20 | EURO 8 | 3 | BTTS | 0.82 | ALTA | R$20,00
+20 | SUPER 22 | 8 | BTTS | 0.87 | ALTA | R$20,00
+20 | SUPER 10 | 4 | BTTS | 0.83 | ALTA | R$20,00
+20 | SUPER 34 | 12 | BTTS | 0.80 | ALTA | R$20,00
+20 | PREMIER 12 | 5 | BTTS | 0.90 | ALTA | R$20,00
+20 | PREMIER 39 | 14 | BTTS | 0.89 | ALTA | R$20,00
+20 | PREMIER 6 | 3 | BTTS | 0.88 | ALTA | R$20,00
+21 | COPA 22 | 8 | BTTS | 0.52 | BAIXA | R$5,00
+21 | COPA 1 | 1 | BTTS | 0.50 | BAIXA | R$5,00
+21 | COPA 58 | 20 | BTTS | 0.50 | BAIXA | R$5,00
+21 | EURO 8 | 3 | BTTS | 0.64 | MÉDIA | R$10,00
+21 | EURO 2 | 1 | BTTS | 0.50 | BAIXA | R$5,00
+21 | EURO 59 | 20 | BTTS | 0.50 | BAIXA | R$5,00
+21 | SUPER 43 | 15 | BTTS | 0.79 | ALTA | R$20,00
+21 | SUPER 10 | 4 | BTTS | 0.65 | MÉDIA | R$10,00
+21 | SUPER 40 | 14 | BTTS | 0.63 | MÉDIA | R$10,00
+21 | PREMIER 6 | 3 | BTTS | 0.87 | ALTA | R$20,00
+21 | PREMIER 45 | 16 | BTTS | 0.85 | ALTA | R$20,00
+21 | PREMIER 12 | 5 | BTTS | 0.83 | ALTA | R$20,00
+22 | COPA 22 | 8 | BTTS | 0.55 | BAIXA | R$5,00
+22 | COPA 1 | 1 | BTTS | 0.50 | BAIXA | R$5,00
+22 | COPA 58 | 20 | BTTS | 0.50 | BAIXA | R$5,00
+22 | EURO 8 | 3 | BTTS | 0.78 | ALTA | R$20,00
+22 | EURO 53 | 18 | BTTS | 0.61 | MÉDIA | R$10,00
+22 | EURO 35 | 12 | BTTS | 0.54 | BAIXA | R$5,00
+22 | SUPER 43 | 15 | BTTS | 0.81 | ALTA | R$20,00
+22 | SUPER 10 | 4 | BTTS | 0.70 | MÉDIA | R$10,00
+22 | SUPER 22 | 8 | BTTS | 0.64 | MÉDIA | R$10,00
+22 | PREMIER 6 | 3 | BTTS | 0.88 | ALTA | R$20,00
+22 | PREMIER 12 | 5 | BTTS | 0.85 | ALTA | R$20,00
+22 | PREMIER 39 | 14 | BTTS | 0.75 | ALTA | R$20,00
+23 | COPA 22 | 8 | BTTS | 0.55 | BAIXA | R$5,00
+23 | COPA 1 | 1 | BTTS | 0.50 | BAIXA | R$5,00
+23 | COPA 58 | 20 | BTTS | 0.50 | BAIXA | R$5,00
+23 | EURO 8 | 3 | BTTS | 0.78 | ALTA | R$20,00
+23 | EURO 53 | 18 | BTTS | 0.64 | MÉDIA | R$10,00
+23 | EURO 35 | 12 | BTTS | 0.54 | BAIXA | R$5,00
+23 | SUPER 43 | 15 | BTTS | 0.73 | MÉDIA | R$10,00
+23 | SUPER 10 | 4 | BTTS | 0.67 | MÉDIA | R$10,00
+23 | SUPER 22 | 8 | BTTS | 0.64 | MÉDIA | R$10,00
+23 | PREMIER 6 | 3 | BTTS | 0.88 | ALTA | R$20,00
+23 | PREMIER 12 | 5 | BTTS | 0.85 | ALTA | R$20,00
+23 | PREMIER 39 | 14 | BTTS | 0.75 | ALTA | R$20,00
+0 | COPA 1 | 1 | BTTS | 0.50 | BAIXA | R$5,00
+0 | COPA 58 | 20 | BTTS | 0.50 | BAIXA | R$5,00
+0 | COPA 22 | 8 | BTTS | 0.49 | BAIXA | R$5,00
+0 | EURO 8 | 3 | BTTS | 0.52 | BAIXA | R$5,00
+0 | EURO 2 | 1 | BTTS | 0.50 | BAIXA | R$5,00
+0 | EURO 59 | 20 | BTTS | 0.50 | BAIXA | R$5,00
+0 | SUPER 10 | 4 | BTTS | 0.62 | MÉDIA | R$10,00
+0 | SUPER 43 | 15 | BTTS | 0.60 | MÉDIA | R$10,00
+0 | SUPER 22 | 8 | BTTS | 0.52 | BAIXA | R$5,00
+0 | PREMIER 6 | 3 | BTTS | 0.75 | ALTA | R$20,00
+0 | PREMIER 12 | 5 | BTTS | 0.75 | ALTA | R$20,00
+0 | PREMIER 27 | 10 | BTTS | 0.70 | MÉDIA | R$10,00
+
+
+LEGENDA DE CAMPEONATOS:
+COPA: 01, 04, 07, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58
+EURO: 02, 05, 08, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59
+SUPER: 01, 04, 07, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58
+PREMIER: 00, 03, 06, 09, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57
+
+
+INSTRUÇÕES PARA USO:
+1. Para cada hora, comece apostando no campeonato com maior probabilidade
+2. Se perder, passe para o segundo campeonato com maior probabilidade (Gale 1)
+3. Se perder novamente, passe para o terceiro campeonato com maior probabilidade (Gale 2)
+4. Valores de stake para Martingale:
+   - Aposta inicial: valor da STAKE recomendada
+   - Gale 1: 2x o valor da STAKE inicial
+   - Gale 2: 2x o valor do Gale 1

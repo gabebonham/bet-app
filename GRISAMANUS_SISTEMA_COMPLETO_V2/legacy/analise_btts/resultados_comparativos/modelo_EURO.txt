@@ -1,0 +1,35 @@
+Resultados do modelo para EURO:
+Acurácia: 65.00%
+
+Relatório de classificação:
+              precision    recall  f1-score   support
+
+         0.0       0.70      0.83      0.76        54
+         1.0       0.44      0.27      0.33        26
+
+    accuracy                           0.65        80
+   macro avg       0.57      0.55      0.55        80
+weighted avg       0.62      0.65      0.62        80
+
+Matriz de confusão:
+[[45  9]
+ [19  7]]
+
+Importância das features:
+Vizinho_1: 3.27%
+Vizinho_2: 3.89%
+Vizinho_3: 4.08%
+Vizinho_4: 3.50%
+Vizinho_5: 4.11%
+Vizinho_6: 4.04%
+Vizinho_7: 3.86%
+Vizinho_8: 3.99%
+Media_Linha: 11.23%
+Media_Coluna: 18.87%
+Tendencia_Linha: 11.95%
+Tendencia_Coluna: 10.90%
+Proporcao_Global: 0.00%
+Alternancia: 9.73%
+Ciclo_3h: 3.63%
+Ciclo_6h: 2.11%
+Ciclo_12h: 0.87%

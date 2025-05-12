@@ -1,0 +1,35 @@
+Resultados do modelo para SUPER:
+Acurácia: 75.00%
+
+Relatório de classificação:
+              precision    recall  f1-score   support
+
+         0.0       0.79      0.92      0.85        61
+         1.0       0.44      0.21      0.29        19
+
+    accuracy                           0.75        80
+   macro avg       0.62      0.56      0.57        80
+weighted avg       0.71      0.75      0.71        80
+
+Matriz de confusão:
+[[56  5]
+ [15  4]]
+
+Importância das features:
+Vizinho_1: 3.04%
+Vizinho_2: 3.77%
+Vizinho_3: 4.30%
+Vizinho_4: 3.94%
+Vizinho_5: 3.35%
+Vizinho_6: 4.36%
+Vizinho_7: 3.55%
+Vizinho_8: 2.78%
+Media_Linha: 10.05%
+Media_Coluna: 19.28%
+Tendencia_Linha: 12.71%
+Tendencia_Coluna: 9.95%
+Proporcao_Global: 0.00%
+Alternancia: 11.33%
+Ciclo_3h: 4.61%
+Ciclo_6h: 2.37%
+Ciclo_12h: 0.61%

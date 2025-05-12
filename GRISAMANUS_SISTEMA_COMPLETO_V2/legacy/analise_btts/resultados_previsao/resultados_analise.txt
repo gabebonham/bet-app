@@ -1,0 +1,592 @@
+ANÁLISE DE PADRÕES GEOMÉTRICOS E PREVISÕES PARA BTTS
+=================================================
+
+1. AVALIAÇÃO DOS MODELOS
+------------------------
+Random Forest:
+Acurácia: 0.7415
+Precisão: 0.3898
+Recall: 0.3537
+F1-Score: 0.3380
+
+Rede Neural:
+Acurácia: 0.6731
+Precisão: 0.3662
+Recall: 0.3694
+F1-Score: 0.3677
+
+2. FEATURES MAIS IMPORTANTES
+---------------------------
+1. Tendência Global: 0.0981
+2. Proporção Verde Global: 0.0973
+3. Ciclo 6h: 0.0953
+4. Alternância: 0.0911
+5. Tendência Coluna: 0.0805
+6. Ciclo 12h: 0.0740
+7. Desvio Padrão 10h: 0.0701
+8. Proporção Verde Coluna: 0.0641
+9. Diagonais Principais: 0.0630
+10. Probabilidade Poisson: 0.0612
+11. Média Móvel 5h: 0.0562
+12. Diagonais Secundárias: 0.0512
+13. Antepenúltimo Resultado: 0.0274
+14. Retângulos: 0.0262
+15. Penúltimo Resultado: 0.0230
+16. Último Resultado: 0.0213
+
+3. CONFIABILIDADE DOS PADRÕES GEOMÉTRICOS
+----------------------------------------
+Diagonais Principais:
+  Taxa de acerto: 0.2567
+  Total de ocorrências: 783
+  Número de acertos: 201
+
+Diagonais Secundarias:
+  Taxa de acerto: 0.2763
+  Total de ocorrências: 818
+  Número de acertos: 226
+
+Retangulos:
+  Taxa de acerto: 0.2981
+  Total de ocorrências: 312
+  Número de acertos: 93
+
+Triangulos:
+  Taxa de acerto: 0.2854
+  Total de ocorrências: 1300
+  Número de acertos: 371
+
+4. PONTOS DE REVERSÃO
+-------------------
+Random Forest:
+  Ponto 1: Hora futura 1, Campeonato 1
+  Ponto 2: Hora futura 9, Campeonato 1
+  Ponto 3: Hora futura 13, Campeonato 1
+  Ponto 4: Hora futura 21, Campeonato 1
+  Ponto 5: Hora futura 25, Campeonato 1
+  Ponto 6: Hora futura 26, Campeonato 1
+  Ponto 7: Hora futura 38, Campeonato 1
+  Ponto 8: Hora futura 40, Campeonato 1
+  Ponto 9: Hora futura 8, Campeonato 2
+  Ponto 10: Hora futura 12, Campeonato 2
+  Ponto 11: Hora futura 18, Campeonato 2
+  Ponto 12: Hora futura 19, Campeonato 2
+  Ponto 13: Hora futura 20, Campeonato 2
+  Ponto 14: Hora futura 25, Campeonato 2
+  Ponto 15: Hora futura 26, Campeonato 2
+  Ponto 16: Hora futura 40, Campeonato 2
+  Ponto 17: Hora futura 41, Campeonato 2
+  Ponto 18: Hora futura 42, Campeonato 2
+  Ponto 19: Hora futura 43, Campeonato 2
+  Ponto 20: Hora futura 20, Campeonato 3
+  Ponto 21: Hora futura 25, Campeonato 3
+  Ponto 22: Hora futura 28, Campeonato 3
+  Ponto 23: Hora futura 29, Campeonato 3
+  Ponto 24: Hora futura 34, Campeonato 3
+  Ponto 25: Hora futura 35, Campeonato 3
+  Ponto 26: Hora futura 36, Campeonato 3
+  Ponto 27: Hora futura 45, Campeonato 3
+  Ponto 28: Hora futura 47, Campeonato 3
+  Ponto 29: Hora futura 7, Campeonato 4
+  Ponto 30: Hora futura 10, Campeonato 4
+  Ponto 31: Hora futura 11, Campeonato 4
+  Ponto 32: Hora futura 12, Campeonato 4
+  Ponto 33: Hora futura 18, Campeonato 4
+  Ponto 34: Hora futura 40, Campeonato 4
+  Ponto 35: Hora futura 42, Campeonato 4
+  Ponto 36: Hora futura 43, Campeonato 4
+  Ponto 37: Hora futura 44, Campeonato 4
+  Ponto 38: Hora futura 1, Campeonato 5
+  Ponto 39: Hora futura 20, Campeonato 5
+  Ponto 40: Hora futura 21, Campeonato 5
+  Ponto 41: Hora futura 23, Campeonato 5
+  Ponto 42: Hora futura 24, Campeonato 5
+  Ponto 43: Hora futura 25, Campeonato 5
+  Ponto 44: Hora futura 26, Campeonato 5
+  Ponto 45: Hora futura 45, Campeonato 5
+  Ponto 46: Hora futura 46, Campeonato 5
+  Ponto 47: Hora futura 1, Campeonato 6
+  Ponto 48: Hora futura 2, Campeonato 6
+  Ponto 49: Hora futura 21, Campeonato 6
+  Ponto 50: Hora futura 22, Campeonato 6
+  Ponto 51: Hora futura 24, Campeonato 6
+  Ponto 52: Hora futura 25, Campeonato 6
+  Ponto 53: Hora futura 26, Campeonato 6
+  Ponto 54: Hora futura 27, Campeonato 6
+  Ponto 55: Hora futura 46, Campeonato 6
+  Ponto 56: Hora futura 47, Campeonato 6
+  Ponto 57: Hora futura 2, Campeonato 7
+  Ponto 58: Hora futura 22, Campeonato 7
+  Ponto 59: Hora futura 23, Campeonato 7
+  Ponto 60: Hora futura 25, Campeonato 7
+  Ponto 61: Hora futura 27, Campeonato 7
+  Ponto 62: Hora futura 47, Campeonato 7
+  Ponto 63: Hora futura 1, Campeonato 8
+  Ponto 64: Hora futura 19, Campeonato 8
+  Ponto 65: Hora futura 20, Campeonato 8
+  Ponto 66: Hora futura 24, Campeonato 8
+  Ponto 67: Hora futura 27, Campeonato 8
+  Ponto 68: Hora futura 32, Campeonato 8
+  Ponto 69: Hora futura 33, Campeonato 8
+  Ponto 70: Hora futura 39, Campeonato 8
+  Ponto 71: Hora futura 40, Campeonato 8
+  Ponto 72: Hora futura 45, Campeonato 8
+  Ponto 73: Hora futura 46, Campeonato 8
+  Ponto 74: Hora futura 2, Campeonato 11
+  Ponto 75: Hora futura 4, Campeonato 11
+  Ponto 76: Hora futura 9, Campeonato 11
+  Ponto 77: Hora futura 10, Campeonato 11
+  Ponto 78: Hora futura 11, Campeonato 11
+  Ponto 79: Hora futura 12, Campeonato 11
+  Ponto 80: Hora futura 13, Campeonato 11
+  Ponto 81: Hora futura 14, Campeonato 11
+  Ponto 82: Hora futura 15, Campeonato 11
+  Ponto 83: Hora futura 16, Campeonato 11
+  Ponto 84: Hora futura 29, Campeonato 11
+  Ponto 85: Hora futura 38, Campeonato 11
+  Ponto 86: Hora futura 42, Campeonato 11
+  Ponto 87: Hora futura 43, Campeonato 11
+  Ponto 88: Hora futura 44, Campeonato 11
+  Ponto 89: Hora futura 19, Campeonato 13
+  Ponto 90: Hora futura 20, Campeonato 13
+  Ponto 91: Hora futura 22, Campeonato 13
+  Ponto 92: Hora futura 23, Campeonato 13
+  Ponto 93: Hora futura 24, Campeonato 13
+  Ponto 94: Hora futura 25, Campeonato 13
+  Ponto 95: Hora futura 44, Campeonato 13
+  Ponto 96: Hora futura 45, Campeonato 13
+  Ponto 97: Hora futura 47, Campeonato 13
+  Ponto 98: Hora futura 4, Campeonato 14
+  Ponto 99: Hora futura 5, Campeonato 14
+  Ponto 100: Hora futura 6, Campeonato 14
+  Ponto 101: Hora futura 10, Campeonato 14
+  Ponto 102: Hora futura 11, Campeonato 14
+  Ponto 103: Hora futura 29, Campeonato 14
+  Ponto 104: Hora futura 31, Campeonato 14
+  Ponto 105: Hora futura 35, Campeonato 14
+  Ponto 106: Hora futura 38, Campeonato 14
+  Ponto 107: Hora futura 10, Campeonato 15
+  Ponto 108: Hora futura 11, Campeonato 15
+  Ponto 109: Hora futura 16, Campeonato 15
+  Ponto 110: Hora futura 17, Campeonato 15
+  Ponto 111: Hora futura 21, Campeonato 15
+  Ponto 112: Hora futura 22, Campeonato 15
+  Ponto 113: Hora futura 32, Campeonato 15
+  Ponto 114: Hora futura 33, Campeonato 15
+  Ponto 115: Hora futura 38, Campeonato 15
+  Ponto 116: Hora futura 39, Campeonato 15
+  Ponto 117: Hora futura 41, Campeonato 15
+  Ponto 118: Hora futura 42, Campeonato 15
+  Ponto 119: Hora futura 8, Campeonato 16
+  Ponto 120: Hora futura 12, Campeonato 16
+  Ponto 121: Hora futura 18, Campeonato 16
+  Ponto 122: Hora futura 19, Campeonato 16
+  Ponto 123: Hora futura 20, Campeonato 16
+  Ponto 124: Hora futura 25, Campeonato 16
+  Ponto 125: Hora futura 26, Campeonato 16
+  Ponto 126: Hora futura 40, Campeonato 16
+  Ponto 127: Hora futura 41, Campeonato 16
+  Ponto 128: Hora futura 42, Campeonato 16
+  Ponto 129: Hora futura 43, Campeonato 16
+  Ponto 130: Hora futura 1, Campeonato 17
+  Ponto 131: Hora futura 2, Campeonato 17
+  Ponto 132: Hora futura 3, Campeonato 17
+  Ponto 133: Hora futura 12, Campeonato 17
+  Ponto 134: Hora futura 15, Campeonato 17
+  Ponto 135: Hora futura 23, Campeonato 17
+  Ponto 136: Hora futura 24, Campeonato 17
+  Ponto 137: Hora futura 25, Campeonato 17
+  Ponto 138: Hora futura 26, Campeonato 17
+  Ponto 139: Hora futura 27, Campeonato 17
+  Ponto 140: Hora futura 28, Campeonato 17
+  Ponto 141: Hora futura 29, Campeonato 17
+  Ponto 142: Hora futura 38, Campeonato 17
+  Ponto 143: Hora futura 41, Campeonato 17
+  Ponto 144: Hora futura 43, Campeonato 17
+  Ponto 145: Hora futura 44, Campeonato 17
+  Total de pontos de reversão: 145
+
+Rede Neural:
+  Ponto 1: Hora futura 3, Campeonato 0
+  Ponto 2: Hora futura 4, Campeonato 0
+  Ponto 3: Hora futura 5, Campeonato 0
+  Ponto 4: Hora futura 7, Campeonato 0
+  Ponto 5: Hora futura 8, Campeonato 0
+  Ponto 6: Hora futura 9, Campeonato 0
+  Ponto 7: Hora futura 15, Campeonato 0
+  Ponto 8: Hora futura 17, Campeonato 0
+  Ponto 9: Hora futura 19, Campeonato 0
+  Ponto 10: Hora futura 20, Campeonato 0
+  Ponto 11: Hora futura 30, Campeonato 0
+  Ponto 12: Hora futura 31, Campeonato 0
+  Ponto 13: Hora futura 33, Campeonato 0
+  Ponto 14: Hora futura 34, Campeonato 0
+  Ponto 15: Hora futura 40, Campeonato 0
+  Ponto 16: Hora futura 41, Campeonato 0
+  Ponto 17: Hora futura 46, Campeonato 0
+  Ponto 18: Hora futura 47, Campeonato 0
+  Ponto 19: Hora futura 2, Campeonato 1
+  Ponto 20: Hora futura 4, Campeonato 1
+  Ponto 21: Hora futura 13, Campeonato 1
+  Ponto 22: Hora futura 14, Campeonato 1
+  Ponto 23: Hora futura 19, Campeonato 1
+  Ponto 24: Hora futura 20, Campeonato 1
+  Ponto 25: Hora futura 30, Campeonato 1
+  Ponto 26: Hora futura 32, Campeonato 1
+  Ponto 27: Hora futura 34, Campeonato 1
+  Ponto 28: Hora futura 35, Campeonato 1
+  Ponto 29: Hora futura 40, Campeonato 1
+  Ponto 30: Hora futura 41, Campeonato 1
+  Ponto 31: Hora futura 46, Campeonato 1
+  Ponto 32: Hora futura 47, Campeonato 1
+  Ponto 33: Hora futura 3, Campeonato 2
+  Ponto 34: Hora futura 4, Campeonato 2
+  Ponto 35: Hora futura 6, Campeonato 2
+  Ponto 36: Hora futura 7, Campeonato 2
+  Ponto 37: Hora futura 8, Campeonato 2
+  Ponto 38: Hora futura 10, Campeonato 2
+  Ponto 39: Hora futura 17, Campeonato 2
+  Ponto 40: Hora futura 18, Campeonato 2
+  Ponto 41: Hora futura 28, Campeonato 2
+  Ponto 42: Hora futura 29, Campeonato 2
+  Ponto 43: Hora futura 31, Campeonato 2
+  Ponto 44: Hora futura 32, Campeonato 2
+  Ponto 45: Hora futura 39, Campeonato 2
+  Ponto 46: Hora futura 40, Campeonato 2
+  Ponto 47: Hora futura 46, Campeonato 2
+  Ponto 48: Hora futura 47, Campeonato 2
+  Ponto 49: Hora futura 3, Campeonato 3
+  Ponto 50: Hora futura 4, Campeonato 3
+  Ponto 51: Hora futura 11, Campeonato 3
+  Ponto 52: Hora futura 12, Campeonato 3
+  Ponto 53: Hora futura 14, Campeonato 3
+  Ponto 54: Hora futura 15, Campeonato 3
+  Ponto 55: Hora futura 17, Campeonato 3
+  Ponto 56: Hora futura 18, Campeonato 3
+  Ponto 57: Hora futura 20, Campeonato 3
+  Ponto 58: Hora futura 21, Campeonato 3
+  Ponto 59: Hora futura 30, Campeonato 3
+  Ponto 60: Hora futura 32, Campeonato 3
+  Ponto 61: Hora futura 34, Campeonato 3
+  Ponto 62: Hora futura 35, Campeonato 3
+  Ponto 63: Hora futura 44, Campeonato 3
+  Ponto 64: Hora futura 45, Campeonato 3
+  Ponto 65: Hora futura 1, Campeonato 4
+  Ponto 66: Hora futura 3, Campeonato 4
+  Ponto 67: Hora futura 4, Campeonato 4
+  Ponto 68: Hora futura 7, Campeonato 4
+  Ponto 69: Hora futura 8, Campeonato 4
+  Ponto 70: Hora futura 15, Campeonato 4
+  Ponto 71: Hora futura 16, Campeonato 4
+  Ponto 72: Hora futura 18, Campeonato 4
+  Ponto 73: Hora futura 20, Campeonato 4
+  Ponto 74: Hora futura 22, Campeonato 4
+  Ponto 75: Hora futura 23, Campeonato 4
+  Ponto 76: Hora futura 33, Campeonato 4
+  Ponto 77: Hora futura 34, Campeonato 4
+  Ponto 78: Hora futura 36, Campeonato 4
+  Ponto 79: Hora futura 37, Campeonato 4
+  Ponto 80: Hora futura 39, Campeonato 4
+  Ponto 81: Hora futura 40, Campeonato 4
+  Ponto 82: Hora futura 46, Campeonato 4
+  Ponto 83: Hora futura 47, Campeonato 4
+  Ponto 84: Hora futura 1, Campeonato 5
+  Ponto 85: Hora futura 2, Campeonato 5
+  Ponto 86: Hora futura 3, Campeonato 5
+  Ponto 87: Hora futura 4, Campeonato 5
+  Ponto 88: Hora futura 7, Campeonato 5
+  Ponto 89: Hora futura 8, Campeonato 5
+  Ponto 90: Hora futura 10, Campeonato 5
+  Ponto 91: Hora futura 11, Campeonato 5
+  Ponto 92: Hora futura 13, Campeonato 5
+  Ponto 93: Hora futura 17, Campeonato 5
+  Ponto 94: Hora futura 19, Campeonato 5
+  Ponto 95: Hora futura 21, Campeonato 5
+  Ponto 96: Hora futura 29, Campeonato 5
+  Ponto 97: Hora futura 30, Campeonato 5
+  Ponto 98: Hora futura 32, Campeonato 5
+  Ponto 99: Hora futura 34, Campeonato 5
+  Ponto 100: Hora futura 36, Campeonato 5
+  Ponto 101: Hora futura 37, Campeonato 5
+  Ponto 102: Hora futura 42, Campeonato 5
+  Ponto 103: Hora futura 43, Campeonato 5
+  Ponto 104: Hora futura 44, Campeonato 5
+  Ponto 105: Hora futura 45, Campeonato 5
+  Ponto 106: Hora futura 1, Campeonato 6
+  Ponto 107: Hora futura 5, Campeonato 6
+  Ponto 108: Hora futura 8, Campeonato 6
+  Ponto 109: Hora futura 9, Campeonato 6
+  Ponto 110: Hora futura 11, Campeonato 6
+  Ponto 111: Hora futura 20, Campeonato 6
+  Ponto 112: Hora futura 22, Campeonato 6
+  Ponto 113: Hora futura 23, Campeonato 6
+  Ponto 114: Hora futura 29, Campeonato 6
+  Ponto 115: Hora futura 30, Campeonato 6
+  Ponto 116: Hora futura 31, Campeonato 6
+  Ponto 117: Hora futura 32, Campeonato 6
+  Ponto 118: Hora futura 33, Campeonato 6
+  Ponto 119: Hora futura 34, Campeonato 6
+  Ponto 120: Hora futura 37, Campeonato 6
+  Ponto 121: Hora futura 38, Campeonato 6
+  Ponto 122: Hora futura 44, Campeonato 6
+  Ponto 123: Hora futura 45, Campeonato 6
+  Ponto 124: Hora futura 1, Campeonato 7
+  Ponto 125: Hora futura 2, Campeonato 7
+  Ponto 126: Hora futura 4, Campeonato 7
+  Ponto 127: Hora futura 15, Campeonato 7
+  Ponto 128: Hora futura 16, Campeonato 7
+  Ponto 129: Hora futura 18, Campeonato 7
+  Ponto 130: Hora futura 20, Campeonato 7
+  Ponto 131: Hora futura 22, Campeonato 7
+  Ponto 132: Hora futura 23, Campeonato 7
+  Ponto 133: Hora futura 33, Campeonato 7
+  Ponto 134: Hora futura 34, Campeonato 7
+  Ponto 135: Hora futura 36, Campeonato 7
+  Ponto 136: Hora futura 37, Campeonato 7
+  Ponto 137: Hora futura 39, Campeonato 7
+  Ponto 138: Hora futura 40, Campeonato 7
+  Ponto 139: Hora futura 46, Campeonato 7
+  Ponto 140: Hora futura 47, Campeonato 7
+  Ponto 141: Hora futura 1, Campeonato 8
+  Ponto 142: Hora futura 9, Campeonato 8
+  Ponto 143: Hora futura 25, Campeonato 8
+  Ponto 144: Hora futura 26, Campeonato 8
+  Ponto 145: Hora futura 28, Campeonato 8
+  Ponto 146: Hora futura 29, Campeonato 8
+  Ponto 147: Hora futura 31, Campeonato 8
+  Ponto 148: Hora futura 32, Campeonato 8
+  Ponto 149: Hora futura 39, Campeonato 8
+  Ponto 150: Hora futura 40, Campeonato 8
+  Ponto 151: Hora futura 44, Campeonato 8
+  Ponto 152: Hora futura 45, Campeonato 8
+  Ponto 153: Hora futura 46, Campeonato 8
+  Ponto 154: Hora futura 2, Campeonato 9
+  Ponto 155: Hora futura 4, Campeonato 9
+  Ponto 156: Hora futura 15, Campeonato 9
+  Ponto 157: Hora futura 17, Campeonato 9
+  Ponto 158: Hora futura 19, Campeonato 9
+  Ponto 159: Hora futura 21, Campeonato 9
+  Ponto 160: Hora futura 31, Campeonato 9
+  Ponto 161: Hora futura 32, Campeonato 9
+  Ponto 162: Hora futura 34, Campeonato 9
+  Ponto 163: Hora futura 35, Campeonato 9
+  Ponto 164: Hora futura 37, Campeonato 9
+  Ponto 165: Hora futura 38, Campeonato 9
+  Ponto 166: Hora futura 44, Campeonato 9
+  Ponto 167: Hora futura 45, Campeonato 9
+  Ponto 168: Hora futura 46, Campeonato 9
+  Ponto 169: Hora futura 1, Campeonato 10
+  Ponto 170: Hora futura 5, Campeonato 10
+  Ponto 171: Hora futura 6, Campeonato 10
+  Ponto 172: Hora futura 7, Campeonato 10
+  Ponto 173: Hora futura 8, Campeonato 10
+  Ponto 174: Hora futura 9, Campeonato 10
+  Ponto 175: Hora futura 11, Campeonato 10
+  Ponto 176: Hora futura 12, Campeonato 10
+  Ponto 177: Hora futura 14, Campeonato 10
+  Ponto 178: Hora futura 16, Campeonato 10
+  Ponto 179: Hora futura 18, Campeonato 10
+  Ponto 180: Hora futura 20, Campeonato 10
+  Ponto 181: Hora futura 22, Campeonato 10
+  Ponto 182: Hora futura 24, Campeonato 10
+  Ponto 183: Hora futura 26, Campeonato 10
+  Ponto 184: Hora futura 27, Campeonato 10
+  Ponto 185: Hora futura 33, Campeonato 10
+  Ponto 186: Hora futura 34, Campeonato 10
+  Ponto 187: Hora futura 36, Campeonato 10
+  Ponto 188: Hora futura 37, Campeonato 10
+  Ponto 189: Hora futura 39, Campeonato 10
+  Ponto 190: Hora futura 40, Campeonato 10
+  Ponto 191: Hora futura 46, Campeonato 10
+  Ponto 192: Hora futura 3, Campeonato 11
+  Ponto 193: Hora futura 10, Campeonato 11
+  Ponto 194: Hora futura 11, Campeonato 11
+  Ponto 195: Hora futura 13, Campeonato 11
+  Ponto 196: Hora futura 14, Campeonato 11
+  Ponto 197: Hora futura 16, Campeonato 11
+  Ponto 198: Hora futura 26, Campeonato 11
+  Ponto 199: Hora futura 27, Campeonato 11
+  Ponto 200: Hora futura 28, Campeonato 11
+  Ponto 201: Hora futura 29, Campeonato 11
+  Ponto 202: Hora futura 31, Campeonato 11
+  Ponto 203: Hora futura 32, Campeonato 11
+  Ponto 204: Hora futura 34, Campeonato 11
+  Ponto 205: Hora futura 35, Campeonato 11
+  Ponto 206: Hora futura 44, Campeonato 11
+  Ponto 207: Hora futura 45, Campeonato 11
+  Ponto 208: Hora futura 46, Campeonato 11
+  Ponto 209: Hora futura 2, Campeonato 12
+  Ponto 210: Hora futura 3, Campeonato 12
+  Ponto 211: Hora futura 4, Campeonato 12
+  Ponto 212: Hora futura 13, Campeonato 12
+  Ponto 213: Hora futura 14, Campeonato 12
+  Ponto 214: Hora futura 15, Campeonato 12
+  Ponto 215: Hora futura 17, Campeonato 12
+  Ponto 216: Hora futura 19, Campeonato 12
+  Ponto 217: Hora futura 21, Campeonato 12
+  Ponto 218: Hora futura 31, Campeonato 12
+  Ponto 219: Hora futura 32, Campeonato 12
+  Ponto 220: Hora futura 34, Campeonato 12
+  Ponto 221: Hora futura 35, Campeonato 12
+  Ponto 222: Hora futura 37, Campeonato 12
+  Ponto 223: Hora futura 38, Campeonato 12
+  Ponto 224: Hora futura 44, Campeonato 12
+  Ponto 225: Hora futura 45, Campeonato 12
+  Ponto 226: Hora futura 46, Campeonato 12
+  Ponto 227: Hora futura 1, Campeonato 13
+  Ponto 228: Hora futura 3, Campeonato 13
+  Ponto 229: Hora futura 4, Campeonato 13
+  Ponto 230: Hora futura 5, Campeonato 13
+  Ponto 231: Hora futura 6, Campeonato 13
+  Ponto 232: Hora futura 9, Campeonato 13
+  Ponto 233: Hora futura 11, Campeonato 13
+  Ponto 234: Hora futura 16, Campeonato 13
+  Ponto 235: Hora futura 18, Campeonato 13
+  Ponto 236: Hora futura 23, Campeonato 13
+  Ponto 237: Hora futura 28, Campeonato 13
+  Ponto 238: Hora futura 29, Campeonato 13
+  Ponto 239: Hora futura 34, Campeonato 13
+  Ponto 240: Hora futura 35, Campeonato 13
+  Ponto 241: Hora futura 37, Campeonato 13
+  Ponto 242: Hora futura 38, Campeonato 13
+  Ponto 243: Hora futura 43, Campeonato 13
+  Ponto 244: Hora futura 45, Campeonato 13
+  Ponto 245: Hora futura 46, Campeonato 13
+  Ponto 246: Hora futura 1, Campeonato 14
+  Ponto 247: Hora futura 2, Campeonato 14
+  Ponto 248: Hora futura 3, Campeonato 14
+  Ponto 249: Hora futura 5, Campeonato 14
+  Ponto 250: Hora futura 6, Campeonato 14
+  Ponto 251: Hora futura 7, Campeonato 14
+  Ponto 252: Hora futura 8, Campeonato 14
+  Ponto 253: Hora futura 9, Campeonato 14
+  Ponto 254: Hora futura 12, Campeonato 14
+  Ponto 255: Hora futura 13, Campeonato 14
+  Ponto 256: Hora futura 24, Campeonato 14
+  Ponto 257: Hora futura 25, Campeonato 14
+  Ponto 258: Hora futura 27, Campeonato 14
+  Ponto 259: Hora futura 28, Campeonato 14
+  Ponto 260: Hora futura 30, Campeonato 14
+  Ponto 261: Hora futura 31, Campeonato 14
+  Ponto 262: Hora futura 39, Campeonato 14
+  Ponto 263: Hora futura 41, Campeonato 14
+  Ponto 264: Hora futura 46, Campeonato 14
+  Ponto 265: Hora futura 2, Campeonato 15
+  Ponto 266: Hora futura 3, Campeonato 15
+  Ponto 267: Hora futura 12, Campeonato 15
+  Ponto 268: Hora futura 13, Campeonato 15
+  Ponto 269: Hora futura 18, Campeonato 15
+  Ponto 270: Hora futura 20, Campeonato 15
+  Ponto 271: Hora futura 30, Campeonato 15
+  Ponto 272: Hora futura 32, Campeonato 15
+  Ponto 273: Hora futura 34, Campeonato 15
+  Ponto 274: Hora futura 35, Campeonato 15
+  Ponto 275: Hora futura 40, Campeonato 15
+  Ponto 276: Hora futura 41, Campeonato 15
+  Ponto 277: Hora futura 46, Campeonato 15
+  Ponto 278: Hora futura 47, Campeonato 15
+  Ponto 279: Hora futura 1, Campeonato 16
+  Ponto 280: Hora futura 3, Campeonato 16
+  Ponto 281: Hora futura 4, Campeonato 16
+  Ponto 282: Hora futura 5, Campeonato 16
+  Ponto 283: Hora futura 8, Campeonato 16
+  Ponto 284: Hora futura 9, Campeonato 16
+  Ponto 285: Hora futura 19, Campeonato 16
+  Ponto 286: Hora futura 20, Campeonato 16
+  Ponto 287: Hora futura 30, Campeonato 16
+  Ponto 288: Hora futura 32, Campeonato 16
+  Ponto 289: Hora futura 38, Campeonato 16
+  Ponto 290: Hora futura 39, Campeonato 16
+  Ponto 291: Hora futura 44, Campeonato 16
+  Ponto 292: Hora futura 45, Campeonato 16
+  Ponto 293: Hora futura 1, Campeonato 17
+  Ponto 294: Hora futura 2, Campeonato 17
+  Ponto 295: Hora futura 4, Campeonato 17
+  Ponto 296: Hora futura 5, Campeonato 17
+  Ponto 297: Hora futura 18, Campeonato 17
+  Ponto 298: Hora futura 20, Campeonato 17
+  Ponto 299: Hora futura 22, Campeonato 17
+  Ponto 300: Hora futura 23, Campeonato 17
+  Ponto 301: Hora futura 33, Campeonato 17
+  Ponto 302: Hora futura 34, Campeonato 17
+  Ponto 303: Hora futura 36, Campeonato 17
+  Ponto 304: Hora futura 37, Campeonato 17
+  Ponto 305: Hora futura 39, Campeonato 17
+  Ponto 306: Hora futura 40, Campeonato 17
+  Ponto 307: Hora futura 46, Campeonato 17
+  Ponto 308: Hora futura 47, Campeonato 17
+  Ponto 309: Hora futura 3, Campeonato 18
+  Ponto 310: Hora futura 4, Campeonato 18
+  Ponto 311: Hora futura 5, Campeonato 18
+  Ponto 312: Hora futura 7, Campeonato 18
+  Ponto 313: Hora futura 8, Campeonato 18
+  Ponto 314: Hora futura 9, Campeonato 18
+  Ponto 315: Hora futura 15, Campeonato 18
+  Ponto 316: Hora futura 17, Campeonato 18
+  Ponto 317: Hora futura 19, Campeonato 18
+  Ponto 318: Hora futura 20, Campeonato 18
+  Ponto 319: Hora futura 30, Campeonato 18
+  Ponto 320: Hora futura 31, Campeonato 18
+  Ponto 321: Hora futura 33, Campeonato 18
+  Ponto 322: Hora futura 34, Campeonato 18
+  Ponto 323: Hora futura 40, Campeonato 18
+  Ponto 324: Hora futura 41, Campeonato 18
+  Ponto 325: Hora futura 46, Campeonato 18
+  Ponto 326: Hora futura 47, Campeonato 18
+  Ponto 327: Hora futura 3, Campeonato 19
+  Ponto 328: Hora futura 4, Campeonato 19
+  Ponto 329: Hora futura 5, Campeonato 19
+  Ponto 330: Hora futura 7, Campeonato 19
+  Ponto 331: Hora futura 8, Campeonato 19
+  Ponto 332: Hora futura 9, Campeonato 19
+  Ponto 333: Hora futura 15, Campeonato 19
+  Ponto 334: Hora futura 17, Campeonato 19
+  Ponto 335: Hora futura 19, Campeonato 19
+  Ponto 336: Hora futura 20, Campeonato 19
+  Ponto 337: Hora futura 30, Campeonato 19
+  Ponto 338: Hora futura 31, Campeonato 19
+  Ponto 339: Hora futura 33, Campeonato 19
+  Ponto 340: Hora futura 34, Campeonato 19
+  Ponto 341: Hora futura 40, Campeonato 19
+  Ponto 342: Hora futura 41, Campeonato 19
+  Ponto 343: Hora futura 46, Campeonato 19
+  Ponto 344: Hora futura 47, Campeonato 19
+  Total de pontos de reversão: 344
+
+5. RECOMENDAÇÕES PARA APOSTAS
+----------------------------
+Com base na análise dos padrões geométricos e nas previsões dos modelos, recomendamos:
+
+Campeonatos mais confiáveis para BTTS (histórico):
+  1. Campeonato 3: 0.3546 (taxa de ocorrência)
+  2. Campeonato 15: 0.3475 (taxa de ocorrência)
+  3. Campeonato 4: 0.3262 (taxa de ocorrência)
+  4. Campeonato 17: 0.3050 (taxa de ocorrência)
+  5. Campeonato 16: 0.2908 (taxa de ocorrência)
+
+Horários mais confiáveis para BTTS (histórico):
+  1. Hora 15: 0.3167 (taxa de ocorrência)
+  2. Hora 23: 0.3100 (taxa de ocorrência)
+  3. Hora 22: 0.2900 (taxa de ocorrência)
+  4. Hora 11: 0.2833 (taxa de ocorrência)
+  5. Hora 20: 0.2833 (taxa de ocorrência)
+
+Melhores oportunidades para BTTS nas próximas 10 horas (Random Forest):
+  1. Hora futura 0, Campeonato 2: 1.0000 (probabilidade)
+  2. Hora futura 0, Campeonato 3: 1.0000 (probabilidade)
+  3. Hora futura 0, Campeonato 4: 1.0000 (probabilidade)
+  4. Hora futura 0, Campeonato 5: 1.0000 (probabilidade)
+  5. Hora futura 0, Campeonato 7: 1.0000 (probabilidade)
+  6. Hora futura 0, Campeonato 8: 1.0000 (probabilidade)
+  7. Hora futura 0, Campeonato 11: 1.0000 (probabilidade)
+  8. Hora futura 0, Campeonato 14: 1.0000 (probabilidade)
+  9. Hora futura 0, Campeonato 16: 1.0000 (probabilidade)
+  10. Hora futura 1, Campeonato 1: 1.0000 (probabilidade)
+
+Padrões geométricos mais confiáveis para previsão:
+  1. Retangulos: 0.2981 (taxa de acerto)
+  2. Triangulos: 0.2854 (taxa de acerto)
+  3. Diagonais Secundarias: 0.2763 (taxa de acerto)
+  4. Diagonais Principais: 0.2567 (taxa de acerto)
+
+NOTA: As previsões e recomendações são baseadas em análise estatística e identificação de padrões geométricos nos dados históricos. Os resultados reais podem variar devido à natureza aleatória dos eventos esportivos.

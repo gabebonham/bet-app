@@ -1,0 +1,5 @@
+Padrões identificados para EURO:
+Retângulos: 101
+Triângulos: 595
+Diagonais principais: 128
+Diagonais secundárias: 133

@@ -1,0 +1,25 @@
+HORA,BTTS,OVER_2.5,RECOMENDACAO_BTTS,RECOMENDACAO_OVER_2.5,CAMPEONATOS_PRIORITARIOS_BTTS,CAMPEONATOS_PRIORITARIOS_OVER_2.5,STAKE_BTTS,STAKE_OVER_2.5,MARTINGALE_BTTS,MARTINGALE_OVER_2.5,CICLO,NOME_CICLO
+0,0.485,0.368,Não Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$5-10,R$5-10,Sem gale,Sem gale,0,00h-05h
+1,0.48,0.372,Não Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$5-10,R$5-10,Sem gale,Sem gale,0,00h-05h
+2,0.475,0.365,Não Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$5-10,R$5-10,Sem gale,Sem gale,0,00h-05h
+3,0.49,0.37,Não Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$5-10,R$5-10,Sem gale,Sem gale,0,00h-05h
+4,0.495,0.375,Não Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$5-10,R$5-10,Sem gale,Sem gale,0,00h-05h
+5,0.485,0.38,Não Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$5-10,R$5-10,Sem gale,Sem gale,0,00h-05h
+6,0.51,0.395,Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$5-10,Até 1 gale,Sem gale,1,06h-11h
+7,0.515,0.4,Recomendado,Não Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$5-10,Até 1 gale,Sem gale,1,06h-11h
+8,0.52,0.405,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,1,06h-11h
+9,0.525,0.41,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,1,06h-11h
+10,0.53,0.415,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,1,06h-11h
+11,0.52,0.405,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,1,06h-11h
+12,0.55,0.475,Altamente Recomendado,Altamente Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$15-20,R$15-20,Até 2 gales,Até 2 gales,2,12h-17h
+13,0.56,0.485,Altamente Recomendado,Altamente Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$15-20,R$15-20,Até 2 gales,Até 2 gales,2,12h-17h
+14,0.57,0.49,Altamente Recomendado,Altamente Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$15-20,R$15-20,Até 2 gales,Até 2 gales,2,12h-17h
+15,0.58,0.495,Altamente Recomendado,Altamente Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$15-20,R$15-20,Até 2 gales,Até 2 gales,2,12h-17h
+16,0.565,0.49,Altamente Recomendado,Altamente Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$15-20,R$15-20,Até 2 gales,Até 2 gales,2,12h-17h
+17,0.56,0.485,Altamente Recomendado,Altamente Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$15-20,R$15-20,Até 2 gales,Até 2 gales,2,12h-17h
+18,0.54,0.45,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,3,18h-23h
+19,0.535,0.445,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,3,18h-23h
+20,0.53,0.44,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,3,18h-23h
+21,0.535,0.435,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,3,18h-23h
+22,0.54,0.44,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,3,18h-23h
+23,0.53,0.445,Recomendado,Recomendado,"PREMIER, COPA","SUPER, PREMIER",R$10-15,R$10-15,Até 1 gale,Até 1 gale,3,18h-23h

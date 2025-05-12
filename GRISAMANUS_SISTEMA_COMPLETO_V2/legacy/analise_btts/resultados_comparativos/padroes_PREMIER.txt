@@ -1,0 +1,5 @@
+Padrões identificados para PREMIER:
+Retângulos: 122
+Triângulos: 669
+Diagonais principais: 146
+Diagonais secundárias: 136

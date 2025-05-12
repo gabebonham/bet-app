@@ -1,0 +1,37 @@
+PREVISÕES BTTS PARA AS PRÓXIMAS 5 HORAS (A PARTIR DA HORA 19) - FORMATO TABELA ORIGINAL
+
+HORA | CAMPEONATO | COLUNA | MERCADO | PROBABILIDADE | CONFIANÇA
+-----|------------|--------|---------|--------------|----------
+20   | COPA 04 |  4     | BTTS    | 11.00%       | BAIXA
+20   | COPA 13 | 13     | BTTS    | 11.00%       | BAIXA
+20   | COPA 16 | 16     | BTTS    | 11.00%       | BAIXA
+21   | COPA 04 |  4     | BTTS    | 11.00%       | BAIXA
+21   | COPA 13 | 13     | BTTS    | 11.00%       | BAIXA
+21   | COPA 16 | 16     | BTTS    | 11.00%       | BAIXA
+22   | COPA 04 |  4     | BTTS    | 11.00%       | BAIXA
+22   | COPA 13 | 13     | BTTS    | 11.00%       | BAIXA
+22   | COPA 16 | 16     | BTTS    | 11.00%       | BAIXA
+23   | COPA 04 |  4     | BTTS    | 11.00%       | BAIXA
+23   | COPA 13 | 13     | BTTS    | 11.00%       | BAIXA
+23   | COPA 16 | 16     | BTTS    | 11.00%       | BAIXA
+00   | COPA 04 |  4     | BTTS    | 11.00%       | BAIXA
+00   | COPA 13 | 13     | BTTS    | 11.00%       | BAIXA
+00   | COPA 16 | 16     | BTTS    | 11.00%       | BAIXA
+
+LEGENDA DE CAMPEONATOS:
+COPA: 01, 04, 07, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58
+EURO: 02, 05, 08, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59
+SUPER: 01, 04, 07, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58
+PREMIER: 00, 03, 06, 09, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 57
+
+INSTRUÇÕES PARA USO:
+1. A coluna HORA indica a hora na tabela (lado esquerdo)
+2. A coluna CAMPEONATO indica o nome e número do campeonato
+3. A coluna COLUNA indica o número da coluna na tabela
+4. Todas as previsões são para o mercado BTTS (Both Teams To Score)
+5. As previsões estão ordenadas por hora e probabilidade (da maior para a menor)
+
+ESTRATÉGIA MARTINGALE RECOMENDADA:
+1. Para cada hora, comece apostando no campeonato com maior probabilidade
+2. Se perder, passe para o segundo campeonato com maior probabilidade
+3. Se perder novamente, passe para o terceiro campeonato com maior probabilidade

@@ -1,0 +1,135 @@
+PREVISÕES INTEGRADAS PARA AS PRÓXIMAS 5 HORAS
+===========================================
+
+HORA 20:
+---------
+
+COPA:
+Coluna 3 (Número 7): Probabilidade 0.72 - Confiança MÉDIA - Stake R$10,00
+Coluna 13 (Número 37): Probabilidade 0.71 - Confiança MÉDIA - Stake R$10,00
+Coluna 8 (Número 22): Probabilidade 0.57 - Confiança BAIXA - Stake R$5,00
+
+EURO:
+Coluna 5 (Número 14): Probabilidade 0.86 - Confiança ALTA - Stake R$20,00
+Coluna 12 (Número 35): Probabilidade 0.86 - Confiança ALTA - Stake R$20,00
+Coluna 3 (Número 8): Probabilidade 0.82 - Confiança ALTA - Stake R$20,00
+
+SUPER:
+Coluna 8 (Número 22): Probabilidade 0.87 - Confiança ALTA - Stake R$20,00
+Coluna 4 (Número 10): Probabilidade 0.83 - Confiança ALTA - Stake R$20,00
+Coluna 12 (Número 34): Probabilidade 0.80 - Confiança ALTA - Stake R$20,00
+
+PREMIER:
+Coluna 5 (Número 12): Probabilidade 0.90 - Confiança ALTA - Stake R$20,00
+Coluna 14 (Número 39): Probabilidade 0.89 - Confiança ALTA - Stake R$20,00
+Coluna 3 (Número 6): Probabilidade 0.88 - Confiança ALTA - Stake R$20,00
+
+HORA 21:
+---------
+
+COPA:
+Coluna 8 (Número 22): Probabilidade 0.52 - Confiança BAIXA - Stake R$5,00
+Coluna 1 (Número 1): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 20 (Número 58): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+
+EURO:
+Coluna 3 (Número 8): Probabilidade 0.64 - Confiança MÉDIA - Stake R$10,00
+Coluna 1 (Número 2): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 20 (Número 59): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+
+SUPER:
+Coluna 15 (Número 43): Probabilidade 0.79 - Confiança ALTA - Stake R$20,00
+Coluna 4 (Número 10): Probabilidade 0.65 - Confiança MÉDIA - Stake R$10,00
+Coluna 14 (Número 40): Probabilidade 0.63 - Confiança MÉDIA - Stake R$10,00
+
+PREMIER:
+Coluna 3 (Número 6): Probabilidade 0.87 - Confiança ALTA - Stake R$20,00
+Coluna 16 (Número 45): Probabilidade 0.85 - Confiança ALTA - Stake R$20,00
+Coluna 5 (Número 12): Probabilidade 0.83 - Confiança ALTA - Stake R$20,00
+
+HORA 22:
+---------
+
+COPA:
+Coluna 8 (Número 22): Probabilidade 0.55 - Confiança BAIXA - Stake R$5,00
+Coluna 1 (Número 1): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 20 (Número 58): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+
+EURO:
+Coluna 3 (Número 8): Probabilidade 0.78 - Confiança ALTA - Stake R$20,00
+Coluna 18 (Número 53): Probabilidade 0.61 - Confiança MÉDIA - Stake R$10,00
+Coluna 12 (Número 35): Probabilidade 0.54 - Confiança BAIXA - Stake R$5,00
+
+SUPER:
+Coluna 15 (Número 43): Probabilidade 0.81 - Confiança ALTA - Stake R$20,00
+Coluna 4 (Número 10): Probabilidade 0.70 - Confiança MÉDIA - Stake R$10,00
+Coluna 8 (Número 22): Probabilidade 0.64 - Confiança MÉDIA - Stake R$10,00
+
+PREMIER:
+Coluna 3 (Número 6): Probabilidade 0.88 - Confiança ALTA - Stake R$20,00
+Coluna 5 (Número 12): Probabilidade 0.85 - Confiança ALTA - Stake R$20,00
+Coluna 14 (Número 39): Probabilidade 0.75 - Confiança ALTA - Stake R$20,00
+
+HORA 23:
+---------
+
+COPA:
+Coluna 8 (Número 22): Probabilidade 0.55 - Confiança BAIXA - Stake R$5,00
+Coluna 1 (Número 1): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 20 (Número 58): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+
+EURO:
+Coluna 3 (Número 8): Probabilidade 0.78 - Confiança ALTA - Stake R$20,00
+Coluna 18 (Número 53): Probabilidade 0.64 - Confiança MÉDIA - Stake R$10,00
+Coluna 12 (Número 35): Probabilidade 0.54 - Confiança BAIXA - Stake R$5,00
+
+SUPER:
+Coluna 15 (Número 43): Probabilidade 0.73 - Confiança MÉDIA - Stake R$10,00
+Coluna 4 (Número 10): Probabilidade 0.67 - Confiança MÉDIA - Stake R$10,00
+Coluna 8 (Número 22): Probabilidade 0.64 - Confiança MÉDIA - Stake R$10,00
+
+PREMIER:
+Coluna 3 (Número 6): Probabilidade 0.88 - Confiança ALTA - Stake R$20,00
+Coluna 5 (Número 12): Probabilidade 0.85 - Confiança ALTA - Stake R$20,00
+Coluna 14 (Número 39): Probabilidade 0.75 - Confiança ALTA - Stake R$20,00
+
+HORA 0:
+---------
+
+COPA:
+Coluna 1 (Número 1): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 20 (Número 58): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 8 (Número 22): Probabilidade 0.49 - Confiança BAIXA - Stake R$5,00
+
+EURO:
+Coluna 3 (Número 8): Probabilidade 0.52 - Confiança BAIXA - Stake R$5,00
+Coluna 1 (Número 2): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+Coluna 20 (Número 59): Probabilidade 0.50 - Confiança BAIXA - Stake R$5,00
+
+SUPER:
+Coluna 4 (Número 10): Probabilidade 0.62 - Confiança MÉDIA - Stake R$10,00
+Coluna 15 (Número 43): Probabilidade 0.60 - Confiança MÉDIA - Stake R$10,00
+Coluna 8 (Número 22): Probabilidade 0.52 - Confiança BAIXA - Stake R$5,00
+
+PREMIER:
+Coluna 3 (Número 6): Probabilidade 0.75 - Confiança ALTA - Stake R$20,00
+Coluna 5 (Número 12): Probabilidade 0.75 - Confiança ALTA - Stake R$20,00
+Coluna 10 (Número 27): Probabilidade 0.70 - Confiança MÉDIA - Stake R$10,00
+
+
+RECOMENDAÇÕES PARA ESTRATÉGIA MARTINGALE
+======================================
+
+Para cada hora, recomendamos a seguinte estratégia:
+1. Apostar simultaneamente nos 2 campeonatos com maior probabilidade na primeira rodada
+2. Se necessário, apostar no 3º campeonato na segunda rodada (Gale 1)
+3. Se necessário, apostar nos 4º e 5º campeonatos na terceira rodada (Gale 2)
+
+Valores de stake recomendados:
+- Confiança BAIXA (probabilidade < 0.6): R$5,00
+- Confiança MÉDIA (probabilidade 0.6-0.75): R$10,00
+- Confiança ALTA (probabilidade > 0.75): R$20,00
+
+Para Martingale:
+- Gale 1: 2x o valor da stake inicial
+- Gale 2: 2x o valor do Gale 1

@@ -1,0 +1,5 @@
+Padrões identificados para COPA:
+Retângulos: 121
+Triângulos: 670
+Diagonais principais: 148
+Diagonais secundárias: 141

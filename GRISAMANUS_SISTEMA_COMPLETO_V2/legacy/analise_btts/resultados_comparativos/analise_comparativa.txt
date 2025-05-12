@@ -1,0 +1,72 @@
+ANÁLISE COMPARATIVA ENTRE CAMPEONATOS
+====================================
+
+1. ACURÁCIA DOS MODELOS
+PREMIER: 76.25%
+SUPER: 75.00%
+COPA: 71.25%
+EURO: 65.00%
+
+2. QUANTIDADE DE PADRÕES GEOMÉTRICOS
+
+Retângulos:
+SUPER: 137
+PREMIER: 122
+COPA: 121
+EURO: 101
+
+Triângulos:
+SUPER: 755
+COPA: 670
+PREMIER: 669
+EURO: 595
+
+Diagonais Principais:
+SUPER: 170
+COPA: 148
+PREMIER: 146
+EURO: 128
+
+Diagonais Secundárias:
+SUPER: 172
+COPA: 141
+PREMIER: 136
+EURO: 133
+
+3. FEATURES MAIS IMPORTANTES POR CAMPEONATO
+
+COPA:
+Media_Coluna: 20.55%
+Media_Linha: 12.91%
+Tendencia_Coluna: 10.97%
+Tendencia_Linha: 10.62%
+Alternancia: 10.26%
+
+EURO:
+Media_Coluna: 18.87%
+Tendencia_Linha: 11.95%
+Media_Linha: 11.23%
+Tendencia_Coluna: 10.90%
+Alternancia: 9.73%
+
+SUPER:
+Media_Coluna: 19.28%
+Tendencia_Linha: 12.71%
+Alternancia: 11.33%
+Media_Linha: 10.05%
+Tendencia_Coluna: 9.95%
+
+PREMIER:
+Media_Coluna: 19.04%
+Media_Linha: 15.49%
+Tendencia_Linha: 10.41%
+Alternancia: 9.71%
+Tendencia_Coluna: 8.27%
+
+4. CONFIABILIDADE DOS PADRÕES
+
+Taxa de acerto por tipo de padrão (média entre campeonatos):
+Retangulos: 29.81%
+Triangulos: 28.54%
+Diagonais_secundarias: 27.63%
+Diagonais_principais: 25.67%

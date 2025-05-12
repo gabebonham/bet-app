@@ -1,0 +1,162 @@
+PADRÕES GEOMÉTRICOS IDENTIFICADOS
+================================
+
+1. TRIÂNGULOS
+--------------
+Triângulo 1: Cor vermelho, Posição (115, 15), Tamanho (3, 2)
+Triângulo 2: Cor verde, Posição (3, 14), Tamanho (2, 4)
+Triângulo 3: Cor verde, Posição (11, 1), Tamanho (4, 3)
+Triângulo 4: Cor verde, Posição (11, 15), Tamanho (4, 3)
+Triângulo 5: Cor verde, Posição (12, 5), Tamanho (4, 3)
+Triângulo 6: Cor verde, Posição (12, 11), Tamanho (4, 3)
+Triângulo 7: Cor verde, Posição (13, 9), Tamanho (5, 2)
+Triângulo 8: Cor verde, Posição (16, 3), Tamanho (4, 2)
+Triângulo 9: Cor verde, Posição (17, 6), Tamanho (4, 3)
+Triângulo 10: Cor verde, Posição (17, 12), Tamanho (4, 5)
+Triângulo 11: Cor verde, Posição (20, 6), Tamanho (6, 8)
+Triângulo 12: Cor verde, Posição (22, 1), Tamanho (5, 4)
+Triângulo 13: Cor verde, Posição (22, 12), Tamanho (12, 7)
+Triângulo 14: Cor verde, Posição (29, 8), Tamanho (2, 3)
+Triângulo 15: Cor verde, Posição (34, 2), Tamanho (11, 9)
+Triângulo 16: Cor verde, Posição (37, 11), Tamanho (5, 4)
+Triângulo 17: Cor verde, Posição (39, 15), Tamanho (4, 3)
+Triângulo 18: Cor verde, Posição (45, 13), Tamanho (4, 5)
+Triângulo 19: Cor verde, Posição (49, 11), Tamanho (6, 7)
+Triângulo 20: Cor verde, Posição (55, 7), Tamanho (3, 4)
+Triângulo 21: Cor verde, Posição (56, 14), Tamanho (2, 3)
+Triângulo 22: Cor verde, Posição (58, 1), Tamanho (7, 8)
+Triângulo 23: Cor verde, Posição (59, 14), Tamanho (3, 4)
+Triângulo 24: Cor verde, Posição (63, 10), Tamanho (3, 5)
+Triângulo 25: Cor verde, Posição (67, 1), Tamanho (6, 5)
+Triângulo 26: Cor verde, Posição (67, 15), Tamanho (5, 3)
+Triângulo 27: Cor verde, Posição (70, 6), Tamanho (2, 4)
+Triângulo 28: Cor verde, Posição (74, 15), Tamanho (6, 4)
+Triângulo 29: Cor verde, Posição (75, 5), Tamanho (3, 2)
+Triângulo 30: Cor verde, Posição (77, 7), Tamanho (2, 5)
+Triângulo 31: Cor verde, Posição (81, 1), Tamanho (15, 7)
+Triângulo 32: Cor verde, Posição (83, 7), Tamanho (7, 11)
+Triângulo 33: Cor verde, Posição (90, 8), Tamanho (3, 4)
+Triângulo 34: Cor verde, Posição (92, 4), Tamanho (7, 6)
+Triângulo 35: Cor verde, Posição (94, 11), Tamanho (2, 3)
+Triângulo 36: Cor verde, Posição (98, 1), Tamanho (5, 3)
+Triângulo 37: Cor verde, Posição (99, 5), Tamanho (3, 4)
+Triângulo 38: Cor verde, Posição (102, 15), Tamanho (4, 3)
+Triângulo 39: Cor verde, Posição (106, 13), Tamanho (4, 5)
+Triângulo 40: Cor verde, Posição (107, 3), Tamanho (4, 2)
+Triângulo 41: Cor verde, Posição (108, 11), Tamanho (4, 2)
+Triângulo 42: Cor verde, Posição (115, 1), Tamanho (9, 8)
+Triângulo 43: Cor verde, Posição (116, 10), Tamanho (6, 8)
+Triângulo 44: Cor verde, Posição (125, 3), Tamanho (5, 4)
+Triângulo 45: Cor verde, Posição (126, 15), Tamanho (5, 3)
+Triângulo 46: Cor verde, Posição (128, 1), Tamanho (2, 4)
+Triângulo 47: Cor verde, Posição (130, 10), Tamanho (3, 2)
+Triângulo 48: Cor verde, Posição (130, 11), Tamanho (9, 7)
+Triângulo 49: Cor verde, Posição (131, 3), Tamanho (2, 4)
+Triângulo 50: Cor verde, Posição (135, 1), Tamanho (6, 7)
+Triângulo 51: Cor verde, Posição (139, 15), Tamanho (2, 3)
+Total de triângulos: 51
+
+2. RETÂNGULOS
+--------------
+Retângulo 1: Cor verde, Posição (107, 3), Tamanho (4, 2), Área 7
+Total de retângulos: 1
+
+3. DIAGONAIS
+--------------
+Diagonal 1: Cor verde, Tipo principal, Início (21, 8), Comprimento 5
+Diagonal 2: Cor verde, Tipo principal, Início (60, 4), Comprimento 5
+Diagonal 3: Cor verde, Tipo principal, Início (136, 2), Comprimento 5
+Diagonal 4: Cor verde, Tipo secundaria, Início (115, 6), Comprimento 5
+Diagonal 5: Cor verde, Tipo principal, Início (17, 12), Comprimento 4
+Diagonal 6: Cor verde, Tipo principal, Início (22, 9), Comprimento 4
+Diagonal 7: Cor verde, Tipo principal, Início (28, 1), Comprimento 4
+Diagonal 8: Cor verde, Tipo principal, Início (29, 15), Comprimento 4
+Diagonal 9: Cor verde, Tipo principal, Início (36, 3), Comprimento 4
+Diagonal 10: Cor verde, Tipo principal, Início (61, 5), Comprimento 4
+Diagonal 11: Cor verde, Tipo principal, Início (125, 3), Comprimento 4
+Diagonal 12: Cor verde, Tipo principal, Início (133, 14), Comprimento 4
+Diagonal 13: Cor verde, Tipo principal, Início (135, 4), Comprimento 4
+Diagonal 14: Cor verde, Tipo principal, Início (135, 11), Comprimento 4
+Diagonal 15: Cor verde, Tipo principal, Início (137, 3), Comprimento 4
+Diagonal 16: Cor verde, Tipo secundaria, Início (6, 5), Comprimento 4
+Diagonal 17: Cor verde, Tipo secundaria, Início (34, 5), Comprimento 4
+Diagonal 18: Cor verde, Tipo secundaria, Início (50, 14), Comprimento 4
+Diagonal 19: Cor verde, Tipo secundaria, Início (81, 6), Comprimento 4
+Diagonal 20: Cor verde, Tipo secundaria, Início (86, 4), Comprimento 4
+Diagonal 21: Cor verde, Tipo secundaria, Início (116, 5), Comprimento 4
+Diagonal 22: Cor verde, Tipo secundaria, Início (117, 13), Comprimento 4
+Diagonal 23: Cor verde, Tipo secundaria, Início (118, 14), Comprimento 4
+Diagonal 24: Cor verde, Tipo principal, Início (6, 5), Comprimento 3
+Diagonal 25: Cor verde, Tipo principal, Início (12, 1), Comprimento 3
+Diagonal 26: Cor verde, Tipo principal, Início (12, 5), Comprimento 3
+Diagonal 27: Cor verde, Tipo principal, Início (18, 13), Comprimento 3
+Diagonal 28: Cor verde, Tipo principal, Início (22, 7), Comprimento 3
+Diagonal 29: Cor verde, Tipo principal, Início (23, 1), Comprimento 3
+Diagonal 30: Cor verde, Tipo principal, Início (23, 10), Comprimento 3
+Diagonal 31: Cor verde, Tipo principal, Início (28, 13), Comprimento 3
+Diagonal 32: Cor verde, Tipo principal, Início (29, 2), Comprimento 3
+Diagonal 33: Cor verde, Tipo principal, Início (30, 16), Comprimento 3
+Diagonal 34: Cor verde, Tipo principal, Início (37, 4), Comprimento 3
+Diagonal 35: Cor verde, Tipo principal, Início (38, 11), Comprimento 3
+Diagonal 36: Cor verde, Tipo principal, Início (39, 15), Comprimento 3
+Diagonal 37: Cor verde, Tipo principal, Início (45, 14), Comprimento 3
+Diagonal 38: Cor verde, Tipo principal, Início (46, 13), Comprimento 3
+Diagonal 39: Cor verde, Tipo principal, Início (49, 7), Comprimento 3
+Diagonal 40: Cor verde, Tipo principal, Início (61, 1), Comprimento 3
+Diagonal 41: Cor verde, Tipo principal, Início (62, 6), Comprimento 3
+Diagonal 42: Cor verde, Tipo principal, Início (63, 12), Comprimento 3
+Diagonal 43: Cor verde, Tipo principal, Início (69, 2), Comprimento 3
+Diagonal 44: Cor verde, Tipo principal, Início (81, 4), Comprimento 3
+Diagonal 45: Cor verde, Tipo principal, Início (83, 9), Comprimento 3
+Diagonal 46: Cor verde, Tipo principal, Início (94, 6), Comprimento 3
+Diagonal 47: Cor verde, Tipo principal, Início (95, 6), Comprimento 3
+Diagonal 48: Cor verde, Tipo principal, Início (103, 15), Comprimento 3
+Diagonal 49: Cor verde, Tipo principal, Início (107, 14), Comprimento 3
+Diagonal 50: Cor verde, Tipo principal, Início (117, 13), Comprimento 3
+Diagonal 51: Cor verde, Tipo principal, Início (126, 4), Comprimento 3
+Diagonal 52: Cor verde, Tipo principal, Início (126, 15), Comprimento 3
+Diagonal 53: Cor verde, Tipo principal, Início (132, 15), Comprimento 3
+Diagonal 54: Cor verde, Tipo principal, Início (134, 15), Comprimento 3
+Diagonal 55: Cor verde, Tipo principal, Início (135, 13), Comprimento 3
+Diagonal 56: Cor verde, Tipo principal, Início (136, 5), Comprimento 3
+Diagonal 57: Cor verde, Tipo principal, Início (136, 12), Comprimento 3
+Diagonal 58: Cor verde, Tipo principal, Início (138, 4), Comprimento 3
+Diagonal 59: Cor verde, Tipo secundaria, Início (7, 4), Comprimento 3
+Diagonal 60: Cor verde, Tipo secundaria, Início (12, 3), Comprimento 3
+Diagonal 61: Cor verde, Tipo secundaria, Início (12, 13), Comprimento 3
+Diagonal 62: Cor verde, Tipo secundaria, Início (18, 8), Comprimento 3
+Diagonal 63: Cor verde, Tipo secundaria, Início (20, 9), Comprimento 3
+Diagonal 64: Cor verde, Tipo secundaria, Início (23, 10), Comprimento 3
+Diagonal 65: Cor verde, Tipo secundaria, Início (27, 14), Comprimento 3
+Diagonal 66: Cor verde, Tipo secundaria, Início (29, 17), Comprimento 3
+Diagonal 67: Cor verde, Tipo secundaria, Início (31, 12), Comprimento 3
+Diagonal 68: Cor verde, Tipo secundaria, Início (35, 4), Comprimento 3
+Diagonal 69: Cor verde, Tipo secundaria, Início (37, 14), Comprimento 3
+Diagonal 70: Cor verde, Tipo secundaria, Início (38, 5), Comprimento 3
+Diagonal 71: Cor verde, Tipo secundaria, Início (46, 17), Comprimento 3
+Diagonal 72: Cor verde, Tipo secundaria, Início (49, 17), Comprimento 3
+Diagonal 73: Cor verde, Tipo secundaria, Início (51, 13), Comprimento 3
+Diagonal 74: Cor verde, Tipo secundaria, Início (52, 15), Comprimento 3
+Diagonal 75: Cor verde, Tipo secundaria, Início (61, 5), Comprimento 3
+Diagonal 76: Cor verde, Tipo secundaria, Início (61, 7), Comprimento 3
+Diagonal 77: Cor verde, Tipo secundaria, Início (67, 5), Comprimento 3
+Diagonal 78: Cor verde, Tipo secundaria, Início (69, 17), Comprimento 3
+Diagonal 79: Cor verde, Tipo secundaria, Início (82, 5), Comprimento 3
+Diagonal 80: Cor verde, Tipo secundaria, Início (83, 9), Comprimento 3
+Diagonal 81: Cor verde, Tipo secundaria, Início (85, 4), Comprimento 3
+Diagonal 82: Cor verde, Tipo secundaria, Início (85, 17), Comprimento 3
+Diagonal 83: Cor verde, Tipo secundaria, Início (87, 3), Comprimento 3
+Diagonal 84: Cor verde, Tipo secundaria, Início (93, 7), Comprimento 3
+Diagonal 85: Cor verde, Tipo secundaria, Início (95, 6), Comprimento 3
+Diagonal 86: Cor verde, Tipo secundaria, Início (116, 7), Comprimento 3
+Diagonal 87: Cor verde, Tipo secundaria, Início (117, 4), Comprimento 3
+Diagonal 88: Cor verde, Tipo secundaria, Início (118, 12), Comprimento 3
+Diagonal 89: Cor verde, Tipo secundaria, Início (119, 13), Comprimento 3
+Diagonal 90: Cor verde, Tipo secundaria, Início (135, 3), Comprimento 3
+Diagonal 91: Cor verde, Tipo secundaria, Início (135, 13), Comprimento 3
+Diagonal 92: Cor verde, Tipo secundaria, Início (136, 16), Comprimento 3
+Total de diagonais: 92
+
+4. CLUSTERS
+--------------
+Total de clusters: 0

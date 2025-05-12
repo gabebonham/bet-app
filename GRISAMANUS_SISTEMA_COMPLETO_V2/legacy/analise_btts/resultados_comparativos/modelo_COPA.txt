@@ -1,0 +1,35 @@
+Resultados do modelo para COPA:
+Acurácia: 71.25%
+
+Relatório de classificação:
+              precision    recall  f1-score   support
+
+         0.0       0.74      0.91      0.82        57
+         1.0       0.50      0.22      0.30        23
+
+    accuracy                           0.71        80
+   macro avg       0.62      0.56      0.56        80
+weighted avg       0.67      0.71      0.67        80
+
+Matriz de confusão:
+[[52  5]
+ [18  5]]
+
+Importância das features:
+Vizinho_1: 3.05%
+Vizinho_2: 3.35%
+Vizinho_3: 4.16%
+Vizinho_4: 3.44%
+Vizinho_5: 3.78%
+Vizinho_6: 3.69%
+Vizinho_7: 3.24%
+Vizinho_8: 3.87%
+Media_Linha: 12.91%
+Media_Coluna: 20.55%
+Tendencia_Linha: 10.62%
+Tendencia_Coluna: 10.97%
+Proporcao_Global: 0.00%
+Alternancia: 10.26%
+Ciclo_3h: 3.31%
+Ciclo_6h: 1.87%
+Ciclo_12h: 0.93%

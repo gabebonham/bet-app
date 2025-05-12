@@ -1,0 +1,5 @@
+Padrões identificados para SUPER:
+Retângulos: 137
+Triângulos: 755
+Diagonais principais: 170
+Diagonais secundárias: 172
