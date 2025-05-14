@@ -42,18 +42,25 @@ class BetMarketVisualizer:
         }   
 
     def _ensure_occurrence(self, df, market_name):
-        """Ensure occurrence column exists for the specific market"""
-        if market_name not in self.markets:
-            raise ValueError(f"Unknown market: {market_name.replace(' ','').lower().replace('.','')}")
-            
-        # Calculate occurrence if not present
-        if 'OCORRENCIA' not in df.columns:
-            df['OCORRENCIA'] = df.apply(self.markets[market_name]['condition'], axis=1)
-        
-        # Ensure hour column exists
-        if 'HORA' not in df.columns and 'Tempo' in df.columns:
-            df['HORA'] = pd.to_datetime(df['Tempo'], format='%H:%M').dt.hour
-            
+        if 'OCORRENCIA' in df.columns:
+            return df
+
+        if market_name == 'over25':
+            df['OCORRENCIA'] = df['Gols totais'] > 2.5
+        elif market_name == 'over35':
+            df['OCORRENCIA'] = df['Gols totais'] > 3.5
+        elif market_name == 'under25':
+            df['OCORRENCIA'] = df['Gols totais'] < 2.5
+        elif market_name == 'under15':
+            df['OCORRENCIA'] = df['Gols totais'] < 1.5
+        elif market_name == 'under35':
+            df['OCORRENCIA'] = df['Gols totais'] < 3.5
+        elif market_name == 'btts':
+            df['OCORRENCIA'] = (df['Gols time casa'] > 0) & (df['Gols time contra'] > 0)
+        else:
+            raise ValueError(f"Unsupported market: {market_name}")
+        df['CICLO'] = pd.to_datetime(df['Data']).dt.to_period('M')
+        df['OCORRENCIA'] = df['OCORRENCIA'].astype(int)
         return df
 
     def plot_occurrence_by_hour(self, df, market_name, title_suffix=""):
@@ -112,7 +119,6 @@ class BetMarketVisualizer:
             
             # Group by championship and calculate occurrence rate
             champ_data = df.groupby('Campeonato')['OCORRENCIA'].agg(['mean', 'count'])
-            champ_data = champ_data[champ_data['count'] >= 5]  # Filter championships with few matches
             champ_data = champ_data.sort_values('mean', ascending=False).head(top_n)
             
             # Create plot
@@ -291,7 +297,9 @@ class BetMarketVisualizer:
                 ('Over 2.5', 'Gols totais > 2.5'),
                 ('Under 2.5', 'Gols totais < 2.5'),
                 ('Over 3.5', 'Gols totais > 3.5'), 
-                ('Under 3.5', 'Gols totais < 3.5')
+                ('Under 3.5', 'Gols totais < 3.5'),
+                ('Under 1.5', 'Gols totais < 1.5'),
+                
             ]
             
             comparison_data = []
@@ -320,7 +328,7 @@ class BetMarketVisualizer:
                 y='Taxa',
                 hue='Mercado',
                 palette='YlOrRd',
-                order=['Over 2.5', 'Under 2.5', 'Over 3.5', 'Under 3.5']
+                order=['Over 2.5', 'Under 2.5', 'Over 3.5', 'Under 3.5', 'Under 1.5']
             )
             
             # Add value labels
@@ -362,11 +370,12 @@ class BetMarketVisualizer:
                 ('Over 2.5', 'Gols totais > 2.5'),
                 ('Under 2.5', 'Gols totais < 2.5'),
                 ('Over 3.5', 'Gols totais > 3.5'),
-                ('Under 3.5', 'Gols totais < 3.5')
+                ('Under 3.5', 'Gols totais < 3.5'),
+                ('Under 1.5', 'Gols totais < 1.5')
             ]
             
             comparison_data = []
-            
+            df['CICLO'] = pd.to_datetime(df['Data']).dt.to_period('M')
             for market_name, condition in market_config:
                 # Calculate occurrence by cycle for each market
                 if 'Over' in market_name:
@@ -390,7 +399,7 @@ class BetMarketVisualizer:
                 y='OCORRENCIA',
                 hue='Mercado',
                 palette='YlOrRd',
-                hue_order=['Over 2.5', 'Under 2.5', 'Over 3.5', 'Under 3.5']
+                hue_order=['Over 2.5', 'Under 2.5', 'Over 3.5', 'Under 3.5', 'Under 1.5']
             )
             
             # Add value labels

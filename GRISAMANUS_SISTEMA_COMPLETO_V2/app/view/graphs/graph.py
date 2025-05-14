@@ -23,47 +23,18 @@ class Graph:
     def exibir_grafico(self, mercado, grafico):
         """Exibe gráficos adaptando-se às colunas disponíveis"""
         try:
-            self.service.load_data()
-            # 1. Verificar inputs e carregar dados
-            if not hasattr(self, 'grafico_selecionado'):
-                messagebox.showerror("Erro", "Controle gráfico_selecionado não encontrado")
-                return
-                
             
-            if not grafico:
-                messagebox.showerror("Erro", "Nenhum tipo de gráfico selecionado")
+            
+            df_path = filedialog.askopenfilename(title="Selecione um Arquivo", filetypes=[("Todos os Arquivos", "*.*")])
+            if not df_path:
                 return
-
-            df = self.service.df_table
+            df = pd.read_csv(df_path)
             
             if df is None or df.empty:
                 messagebox.showwarning("Aviso", "Nenhum dado disponível para análise")
                 return
 
-            # 2. Mapear nomes de colunas alternativos
-            col_mapping = {
-                'Ocorrencia': 'OCORRENCIA',
-                'Hora': 'HORA',
-                'Campeonato': 'Campeonato'
-            }
-
-            # Rename columns if needed
-            for alt_name, correct_name in col_mapping.items():
-                if alt_name in df.columns and correct_name not in df.columns:
-                    df = df.rename(columns={alt_name: correct_name})
-
-            # 3. Verificar colunas disponíveis
-            # In your exibir_grafico method, update these parts:
-
-            # 2. Mapear nomes de colunas alternativos
-            col_mapping = {
-                'Ocorrencia': 'OCORRENCIA',
-                'Hora': 'HORA',
-                'Ciclo': 'CICLO',  # Add mapping for ciclo
-                'Campeonato': 'Campeonato'
-            }
-
-            # 3. Verificar colunas disponíveis
+           
             colunas_disponiveis = set(df.columns.str.upper())
             required_cols = {
                 'Taxa de Ocorrência por Campeonato': {'CAMPEONATO', 'OCORRENCIA'},
@@ -82,34 +53,8 @@ class Graph:
                 "Tendências por Hora",
                 "Correlações entre Mercados"
             ]
-            # 4. Verificar se o gráfico solicitado é possível
-            if grafico in required_cols:
-                missing = [c for c in required_cols[grafico] 
-                        if c not in colunas_disponiveis]
-                if missing:
-                    messagebox.showerror(
-                        "Erro", 
-                        f"Não é possível gerar '{grafico}'\n"
-                        f"Colunas faltando: {', '.join(missing)}\n"
-                        f"Colunas disponíveis: {', '.join(sorted(df.columns))}"
-                    )
-                    print(
-                        "Erro", 
-                        f"Não é possível gerar '{grafico}'\n"
-                        f"Colunas faltando: {', '.join(missing)}\n"
-                        f"Colunas disponíveis: {', '.join(sorted(df.columns))}"
-                    )
-                    return
+            
 
-            # 5. Criar visualizador e gerar gráfico
-            
-            
-            # Ensure hour column exists
-            if 'HORA' not in df.columns and 'Tempo' in df.columns:
-                df['HORA'] = pd.to_datetime(df['Tempo'], format='%H:%M').dt.hour
-            # Label para exibir o gráfico - use the main image_label
-            
-            # Call appropriate visualization method
             output_file = None
             if grafico == "Taxa de Ocorrência por Campeonato":
                 output_file = self.visulizer.plot_occurrence_by_championship(df, mercado)
@@ -158,26 +103,20 @@ class Graph:
             self.label_grafico_comparativo.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
             
 
-            # img = Image.open(arquivo)
-            # img = img.resize((800, 500), Image.LANCZOS)
-            # photo = ImageTk.PhotoImage(img)
-            # print('exibir_grafico_comparativo')
-            # # Exibir imagem
-            # self.label_grafico_comparativo.config(image=photo)
-            # self.label_grafico_comparativo.image = photo  # Manter referência
-            
         except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao exibir imagem: {str(e)}")
+            pass
     def exibir_grafico_comparativo(self, grafico):
         """Exibe um gráfico comparativo entre mercados"""
-        self.service.load_data()
+        df_path = filedialog.askopenfilename(title="Selecione um Arquivo", filetypes=[("Todos os Arquivos", "*.*")])
+        if not df_path:
+            return
         arquivo = None
         # Mapear nome do gráfico para arquivo
         mapeamento = {
             "Comparação de Taxas entre Mercados": "../analise_over35/graficos/comparacao_mercados.png",
             "Comparação de Ciclos entre Mercados": "../analise_over35/graficos/comparacao_ciclos_mercados.png"
         }
-        df = self.service.df_pred
+        df = pd.read_csv(df_path)
         if grafico == 'Comparação de Ciclos entre Mercados': arquivo = self.visulizer.plot_cycle_comparison(df)
         if grafico == 'Comparação de Taxas entre Mercados': arquivo = self.visulizer.plot_market_comparison(df)
         

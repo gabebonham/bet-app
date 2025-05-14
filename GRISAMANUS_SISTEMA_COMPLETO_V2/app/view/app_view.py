@@ -23,17 +23,18 @@ class AppView:
         self.root.minsize(1000, 700)
         self.pred_treeview = ttk.Treeview()
         self.configurar_estilo()
-        self.service = Service()
+        
         self.graph = Graph()
         self.visualizer = BetMarketVisualizer()
+        self.service = Service()
         # Variáveis para valores de stake
-        self.stake_alta = tk.DoubleVar(value=25.0)
-        self.stake_media = tk.DoubleVar(value=15.0)
-        self.stake_baixa = tk.DoubleVar(value=5.0)
-        # Variáveis para níveis de confiança
-        self.nivel_alta = tk.DoubleVar(value=0.70)
-        self.nivel_media = tk.DoubleVar(value=0.60)
-        self.nivel_baixa = tk.DoubleVar(value=0.50)
+        self.stake_alta = self.service.stake_alta 
+        self.stake_media =self.service.stake_media
+        self.stake_baixa =self.service.stake_baixa
+        # Variáveis para n# Variáveis para
+        self.nivel_alta = self.service.nivel_alta 
+        self.nivel_media =self.service.nivel_media
+        self.nivel_baixa =self.service.nivel_baixa
         # Criar estrutura principal
         self.criar_estrutura()
         self.current_image = ''
@@ -46,12 +47,36 @@ class AppView:
         self.mercados_selecionados = {
             "BTTS": tk.BooleanVar(value=True),
             "OVER 2.5": tk.BooleanVar(value=True),
-            "OVER 3.5": tk.BooleanVar(value=True)
+            "OVER 3.5": tk.BooleanVar(value=False),
+            "UNDER 1.5": tk.BooleanVar(value=False),
+            "UNDER 2.5": tk.BooleanVar(value=False),
+            "UNDER 3.5": tk.BooleanVar(value=False)
         }
+        self.tree_btts = ttk.Treeview()
+        self.tree_over25 = ttk.Treeview()
+        self.tree_over35 = ttk.Treeview()
+        self.tree_under15 = ttk.Treeview()
+        self.tree_under25 = ttk.Treeview()
+        self.tree_under35 = ttk.Treeview()
+        self.mercado_treeviews = {
+            "BTTS": self.tree_btts,
+            "OVER 2.5": self.tree_over25,
+            "OVER 3.5": self.tree_over35,
+            "UNDER 1.5": self.tree_under15,
+            "UNDER 2.5": self.tree_under25,
+            "UNDER 3.5": self.tree_under35
+        }
+        self.train = self.service.train
+        self.create = self.service.create
         self.current_graph = ''
         self.grafico_comparativo_selecionado = tk.StringVar()
         # Preencher interface
+        self.table_path = tk.StringVar(value='')
+        self.model_label = tk.StringVar(value='')
+        self.x_table_path = tk.StringVar(value='')
+        self.y_table_path = tk.StringVar(value='')
         self.preencher_interface()
+        
     def atualizar_datetime(self):
         """Atualiza o label de data e hora"""
         self.datetime_label.config(text=datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
@@ -61,15 +86,7 @@ class AppView:
         try:
             config = self.service.carregar_configuracoes()
             
-            # Atualizar os valores da interface
-            self.stake_alta.set(config["stake"]["ALTA"])
-            self.stake_media.set(config["stake"]["MEDIA"])
-            self.stake_baixa.set(config["stake"]["BAIXA"])
-            
-            self.nivel_alta.set(config["niveis_confianca"]["ALTA"])
-            self.nivel_media.set(config["niveis_confianca"]["MEDIA"])
-            self.nivel_baixa.set(config["niveis_confianca"]["BAIXA"])
-            
+           
             messagebox.showinfo("Sucesso", "Configurações carregadas com sucesso!")
             return True
             
@@ -118,6 +135,7 @@ class AppView:
         self.tab_analise = ttk.Frame(self.notebook)
         self.tab_tabelas = ttk.Frame(self.notebook)
         self.tab_configuracoes = ttk.Frame(self.notebook)
+        self.tab_treinamento = ttk.Frame(self.notebook)
         
         self.notebook.add(self.tab_previsoes, text="Previsões")
         self.notebook.add(self.tab_analise, text="Análise")
@@ -160,15 +178,15 @@ class AppView:
         
         # Widgets para configuração de stake
         ttk.Label(frame_stake, text="Confiança ALTA:").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Spinbox(frame_stake, from_=1, to=100, increment=1, textvariable=self.stake_alta.get(), 
+        ttk.Spinbox(frame_stake, from_=1, to=100, increment=1, textvariable=self.stake_alta, 
                    width=10).grid(row=0, column=1, padx=5, pady=5)
         
         ttk.Label(frame_stake, text="Confiança MÉDIA:").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Spinbox(frame_stake, from_=1, to=100, increment=1, textvariable=self.stake_media.get(), 
+        ttk.Spinbox(frame_stake, from_=1, to=100, increment=1, textvariable=self.stake_media, 
                    width=10).grid(row=1, column=1, padx=5, pady=5)
         
         ttk.Label(frame_stake, text="Confiança BAIXA:").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Spinbox(frame_stake, from_=1, to=100, increment=1, textvariable=self.stake_baixa.get(), 
+        ttk.Spinbox(frame_stake, from_=1, to=100, increment=1, textvariable=self.stake_baixa, 
                    width=10).grid(row=2, column=1, padx=5, pady=5)
         
         # Configurações de níveis de confiança
@@ -179,15 +197,15 @@ class AppView:
         
         # Widgets para configuração de níveis de confiança
         ttk.Label(frame_confianca, text="ALTA (>):").grid(row=0, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Spinbox(frame_confianca, from_=0.5, to=1.0, increment=0.01, textvariable=self.nivel_alta.get(), 
+        ttk.Spinbox(frame_confianca, from_=0.5, to=1.0, increment=0.01, textvariable=self.nivel_alta, 
                    width=10).grid(row=0, column=1, padx=5, pady=5)
         
         ttk.Label(frame_confianca, text="MÉDIA (>):").grid(row=1, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Spinbox(frame_confianca, from_=0.5, to=1.0, increment=0.01, textvariable=self.nivel_media.get(), 
+        ttk.Spinbox(frame_confianca, from_=0.5, to=1.0, increment=0.01, textvariable=self.nivel_media, 
                    width=10).grid(row=1, column=1, padx=5, pady=5)
         
         ttk.Label(frame_confianca, text="BAIXA (>):").grid(row=2, column=0, padx=5, pady=5, sticky=tk.W)
-        ttk.Spinbox(frame_confianca, from_=0.5, to=1.0, increment=0.01, textvariable=self.nivel_baixa.get(), 
+        ttk.Spinbox(frame_confianca, from_=0.5, to=1.0, increment=0.01, textvariable=self.nivel_baixa, 
                    width=10).grid(row=2, column=1, padx=5, pady=5)
         
         # Botões
@@ -220,6 +238,69 @@ O sistema inclui:
 - Análises comparativas entre mercados
 - Geração de previsões com diferentes níveis de confiança
 """
+    
+
+    def preencher_aba_treinamento(self):
+        # Main frame for the tab
+        frame_config = ttk.LabelFrame(self.tab_previsoes, text="Sessão de Treinamento", padding=(10, 10))
+        frame_config.pack(fill=tk.X,side=tk.LEFT, padx=10, pady=10)
+
+        # Style configuration
+        style = ttk.Style()
+        style.configure("Custom.TButton", font=("Segoe UI", 10), padding=6)
+        ttk.Checkbutton(frame_config, text='Incluir Geração de nova Entrada', variable=self.create).pack(
+                padx=10, pady=5)
+        ttk.Checkbutton(frame_config, text='Treinar Modelo', variable=self.train).pack(
+                padx=10, pady=5)
+        # File selection button - Tabela Verdadeira
+        btn_tabela = ttk.Button(
+            frame_config, 
+            text="Selecionar Tabela Fonte", 
+            style="Custom.TButton",
+            command=lambda: self.service.open_file('tabela', self.table_path)
+        )
+        btn_tabela.pack(pady=(5, 10), anchor='w', padx=10)
+        table_label = ttk.Label(frame_config, textvariable=self.table_path)
+        table_label.pack(fill=tk.X,padx=10, pady=10)
+        
+        btn_modelo_train = ttk.Button(
+            frame_config, 
+            text="Selecionar Dados para Treino", 
+            style="Custom.TButton",
+            command=lambda:self.service.open_file('x_file',self.x_table_path)
+        )
+        btn_modelo_train.pack(pady=(0, 10), anchor='w', padx=10)
+        x_label = ttk.Label(frame_config, textvariable=self.x_table_path)
+        x_label.pack(fill=tk.X,padx=10, pady=10)
+
+        btn_modelo_y = ttk.Button(
+            frame_config, 
+            text="Selecionar Dados para Compare", 
+            style="Custom.TButton",
+            command=lambda:self.service.open_file('y_file',self.y_table_path)
+        )
+        btn_modelo_y.pack(pady=(0), anchor='w', padx=10)
+        y_label = ttk.Label(frame_config, textvariable=self.y_table_path)
+        y_label.pack(fill=tk.X,padx=10, pady=10)
+        # File selection button - Modelo
+        btn_modelo = ttk.Button(
+            frame_config, 
+            text="Selecionar Modelo", 
+            style="Custom.TButton",
+            command=lambda: self.service.open_file('modelo',self.model_label)
+        )
+        
+        btn_modelo.pack(pady=(0), anchor='w', padx=10)
+        model_label = ttk.Label(frame_config, textvariable=self.model_label)
+        model_label.pack(fill=tk.X,padx=10, pady=10)
+        btn_modelo_create = ttk.Button(
+            frame_config, 
+            text="Limpar Seleções", 
+            style="Custom.TButton",
+            command=lambda:self.service.create_file(self.model_label,self.table_path, self.x_table_path, self.y_table_path)
+        )
+        
+        btn_modelo_create.pack(pady=(0, 10), anchor='w', padx=10)
     def preencher_aba_tabela_consolidada(self):
         """Preenche a aba de tabela consolidada"""
         # Frame para exibir a tabela
@@ -358,46 +439,47 @@ O sistema inclui:
         self.comparison_label = ttk.Label(frame_grafico)
         self.comparison_label.pack(fill=tk.BOTH, expand=True)
 
-    def display(self, mercado,frame ):
+    def display(self, mercado, frame):
         image_path = ''
         if mercado:
-            image_path = self.graph.exibir_grafico(mercado,self.grafico_selecionado.get())
+            image_path = self.graph.exibir_grafico(mercado, self.grafico_selecionado.get())
         else:
             image_path = self.graph.exibir_grafico_comparativo(self.grafico_comparativo_selecionado.get())
-        """Display the generated image in the GUI"""
-        try:
-            
-            self.image_label.destroy()
-            self.image_label = ttk.Label(frame)
-            # Load and display new image
-            img = Image.open(image_path)  # Use the parameter instead of hardcoded path
-            img = img.resize((600, 400), Image.LANCZOS)
-            self.current_image = ImageTk.PhotoImage(img)
-            self.image_label.config(image=self.current_image)
-            self.image_label.image = self.current_image  # Keep a referenc
-            self.current_graph = self.image_label
-            self.image_label.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-            
-            self.label_grafico_comparativo.destroy()
-            self.label_grafico_comparativo = ttk.Label(frame)
-            # Load and display new image
-            img = Image.open(image_path)  # Use the parameter instead of hardcoded path
-            img = img.resize((600, 400), Image.LANCZOS)
-            current_img = ImageTk.PhotoImage(img)
-            self.label_grafico_comparativo.config(image=current_img)
-            self.label_grafico_comparativo.image = current_img  # Keep a referenc
-            self.current_graph = self.label_grafico_comparativo
-            self.label_grafico_comparativo.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-            
 
-            # img = Image.open(arquivo)
-            # img = img.resize((800, 500), Image.LANCZOS)
-            # photo = ImageTk.PhotoImage(img)
-            # print('exibir_grafico_comparativo')
-            # # Exibir imagem
-            # self.label_grafico_comparativo.config(image=photo)
-            # self.label_grafico_comparativo.image = photo  # Manter referência
-            
+        try:
+            # Clear previous image (if any)
+            for widget in frame.winfo_children():
+                widget.destroy()
+
+            # Create scrollable canvas
+            canvas = tk.Canvas(frame, width=600, height=400)
+            scroll_x = tk.Scrollbar(frame, orient="horizontal", command=canvas.xview)
+            scroll_y = tk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+            canvas.configure(xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set)
+
+            scroll_x.pack(side="bottom", fill="x")
+            scroll_y.pack(side="right", fill="y")
+            canvas.pack(side="left", fill="both", expand=True)
+
+            # Create inner frame to hold the image
+            image_frame = tk.Frame(canvas)
+            canvas.create_window((0, 0), window=image_frame, anchor="nw")
+
+            # Load image
+            img = Image.open(image_path)
+            self.original_img_size = img.size  # Save original size in case of zoom/pan features later
+            img = img.resize((800, 600), Image.LANCZOS)
+            self.current_image = ImageTk.PhotoImage(img)
+
+            # Create and place label inside the frame
+            image_label = ttk.Label(image_frame, image=self.current_image)
+            image_label.image = self.current_image  # Keep reference
+            image_label.pack()
+
+            # Update scroll region
+            image_frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao exibir imagem: {str(e)}")
     def preencher_aba_analise_comparativa(self):
@@ -526,10 +608,7 @@ O sistema inclui:
             ttk.Checkbutton(frame_mercados, text=mercado, variable=var).grid(
                 row=0, column=i, padx=10, pady=5)
         
-        # Botão de gerar previsões
-        ttk.Button(self.control_frame, text="Gerar Previsões", 
-                  command=lambda:self.service.processar_previsoes()).pack(side=tk.RIGHT, padx=10, pady=5)
-    
+        
     def preencher_aba_previsoes(self):
         """Preenche a aba de previsões"""
         # Frame para exibir previsões
@@ -541,28 +620,19 @@ O sistema inclui:
         self.previsoes_notebook.pack(fill=tk.BOTH, expand=True)
         
         # Abas para cada mercado
-        self.tab_btts = ttk.Frame(self.previsoes_notebook)
-        self.tab_over25 = ttk.Frame(self.previsoes_notebook)
-        self.tab_over35 = ttk.Frame(self.previsoes_notebook)
-        self.tab_under25 = ttk.Frame(self.previsoes_notebook)
-        self.tab_under35 = ttk.Frame(self.previsoes_notebook)
-        self.tab_under15 = ttk.Frame(self.previsoes_notebook)
+        self.mercado_treeviews['MERCADOS'] = ttk.Frame(self.previsoes_notebook)
         
-        self.previsoes_notebook.add(self.tab_btts, text="BTTS")
-        self.previsoes_notebook.add(self.tab_over25, text="OVER 2.5")
-        self.previsoes_notebook.add(self.tab_over35, text="OVER 3.5")
-        self.previsoes_notebook.add(self.tab_under15, text="UNDER 1.5")
-        self.previsoes_notebook.add(self.tab_under25, text="UNDER 2.5")
-        self.previsoes_notebook.add(self.tab_under35, text="UNDER 3.5")
+        self.previsoes_notebook.add(self.mercado_treeviews['MERCADOS'], text="BTTS")
         
         
         
     
     def criar_treeview_previsoes(self, treeview):
         """Preenche a aba de previsões com notebooks para cada mercado"""
+        self.preencher_aba_treinamento()
         # Main frame
         self.previsoes_frame = ttk.Frame(self.tab_previsoes)
-        self.previsoes_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.previsoes_frame.pack(fill=tk.BOTH,side=tk.RIGHT, anchor='e',expand=True, padx=5, pady=5)
         
         # Notebook (tabbed interface)
         self.previsoes_notebook = ttk.Notebook(self.previsoes_frame)
@@ -570,12 +640,7 @@ O sistema inclui:
         
         # Create tabs for all markets
         markets = [
-            ("btts", "BTTS"),
-            ("over25", "OVER 2.5"),
-            ("over35", "OVER 3.5"), 
-            ("under15", "UNDER 1.5"),
-            ("under25", "UNDER 2.5"),
-            ("under35", "UNDER 3.5")
+            ("MERCADOS", "MERCADOS"),
         ]
         
         # Create tabs dynamically
@@ -584,15 +649,8 @@ O sistema inclui:
             frame = ttk.Frame(self.previsoes_notebook)
             self.previsoes_notebook.add(frame, text=market_name)
             self.market_frames[market_id] = frame
-            self._create_market_tab(frame, market_id)
+            self._create_market_tab(frame, market_name)
         
-        # Add refresh button
-        refresh_btn = ttk.Button(
-            self.previsoes_frame, 
-            text="Atualizar Todas as Previsões",
-            command=lambda:self.service._refresh_all_predictions(self.hora_atual.get(),self.num_horas.get(), self.pred_treeview)
-        )
-        refresh_btn.pack(side=tk.BOTTOM, pady=5)
 
     def _create_market_tab(self, parent, market_id):
         """Creates UI elements for a specific market tab"""
@@ -606,53 +664,41 @@ O sistema inclui:
         
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-        
-        columns = [
-            ("CAMPEONATO", "Campeonato", 120),
-            ("PARTIDA", "Partida", 150),
-            ("HORA", "Hora", 80),
-            ("PROB.", "Probabilidade", 100),
-            ("CONF.", "Confiança", 80),
-            ("STAKE", "Stake", 60),
-            ("ODD", "Odd", 60),
-            ("RESULT.", "Resultado", 80),
-            ("GALE", "Gale", 60)
+        mercados = [
+            "BTTS",
+            "OVER 2.5",
+            "OVER 3.5",
+            "UNDER 1.5",
+            "UNDER 2.5",
+            "UNDER 3.5",
         ]
-        
-        treeview = ttk.Treeview(
-            tree_frame,
-            columns=[col[0] for col in columns],
-            show="headings",
-            yscrollcommand=scrollbar.set,
-            selectmode="browse"
-        )
+        # for mercado in mercados:
+        #     self.mercado_treeviews[mercado] = treeview = ttk.Treeview(
+        #     tree_frame,
+        #     show="headings",
+        #     yscrollcommand=scrollbar.set,
+        #     selectmode="browse"
+        # )
         
         # Configure columns
-        for col_id, heading, width in columns:
-            treeview.column(col_id, width=width, anchor=tk.CENTER)
-            treeview.heading(col_id, text=heading)
-        
-        treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.config(command=treeview.yview)
         
         # Store reference
-        setattr(self, f"treeview_{market_id}", treeview)
-        
+        # setattr(self, f"treeview_{market_id}", treeview)
         # Button panel
         btn_frame = ttk.Frame(container)
         btn_frame.pack(fill=tk.X, pady=5)
         """Gera previsões para os mercados selecionados"""
         hora_atual = self.hora_atual.get()
         num_horas = self.num_horas.get()
-        tree_to_view = getattr(self, f"treeview_{market_id}")
+        # tree_to_view = getattr(self, f"treeview_{market_id}")
         self.status_label.config(text="Gerando previsões...")
         self.root.update()
-        self.pred_treeview = tree_to_view
+        # self.pred_treeview = tree_to_view
         action_buttons = [
-            ("Ver Previsões", lambda m=market_id: self.service.gerar_previsoes(hora_atual,num_horas,market_id,tree_to_view)),
-            ("Exportar CSV", lambda m=market_id: self.service.exportar_dados_csv(tree_to_view)),
-            ("Exportar PDF", lambda m=market_id: self.service.exportar_pdf(tree_to_view, market_id)),
-            ("Limpar", lambda m=market_id: self.service.limpar_treeview(tree_to_view))
+            ("Gerar Previsões", lambda m=market_id: self.service.gerar_previsoes(hora_atual,num_horas,tree_frame,market_id)),
+            ("Exportar CSV", lambda m=market_id: self.service.exportar_dados_csv(self.mercado_treeviews[market_id])),
+            ("Exportar PDF", lambda m=market_id: self.service.exportar_pdf(self.mercado_treeviews, market_id)),
+            ("Limpar", lambda m=market_id: self.service.limpar_treeview(self.mercado_treeviews[market_id]))
         ]
         
         for btn_text, cmd in action_buttons:
