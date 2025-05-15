@@ -42,8 +42,8 @@ class AppView:
         self.label_grafico_comparativo = tk.Label(root)
         self.grafico_selecionado = tk.StringVar()
         # Inicializar variáveis
-        self.hora_atual = tk.IntVar(value=datetime.now().hour)
-        self.num_horas = tk.IntVar(value=3)
+        self.hora_atual = tk.IntVar()
+        self.num_horas = tk.IntVar()
         self.mercados_selecionados = {
             "BTTS": tk.BooleanVar(value=True),
             "OVER 2.5": tk.BooleanVar(value=True),
@@ -66,8 +66,8 @@ class AppView:
             "UNDER 2.5": self.tree_under25,
             "UNDER 3.5": self.tree_under35
         }
-        self.train = self.service.train
-        self.create = self.service.create
+        self.train = tk.BooleanVar(value=True)
+        self.create = tk.BooleanVar(value=True)
         self.current_graph = ''
         self.grafico_comparativo_selecionado = tk.StringVar()
         # Preencher interface
@@ -695,10 +695,7 @@ O sistema inclui:
         self.root.update()
         # self.pred_treeview = tree_to_view
         action_buttons = [
-            ("Gerar Previsões", lambda m=market_id: self.service.gerar_previsoes(hora_atual,num_horas,tree_frame,market_id)),
-            ("Exportar CSV", lambda m=market_id: self.service.exportar_dados_csv(self.mercado_treeviews[market_id])),
-            ("Exportar PDF", lambda m=market_id: self.service.exportar_pdf(self.mercado_treeviews, market_id)),
-            ("Limpar", lambda m=market_id: self.service.limpar_treeview(self.mercado_treeviews[market_id]))
+            ("Gerar Previsões", lambda m=market_id: self.service.gerar_previsoes(self.hora_atual.get(),self.num_horas.get(),tree_frame,market_id, self.create, self.train))
         ]
         
         for btn_text, cmd in action_buttons:

@@ -8,12 +8,13 @@ from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
 import sys
 import os
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from services.file_util import get_most_recent_file, get_most_recent_file_prev
-from ml.implementacao_drisamanus_corrigida import execute
-
+from ml.implementacao_drisamanus_corrigida import execute, create_dated_filename
+from ml.betting_config import BettingConfig
 
 class Service:
     def __init__(self):
@@ -21,117 +22,176 @@ class Service:
         self.df_prev = pd.DataFrame()  # Over 2.5 goals
         self.df_table = pd.DataFrame()  # Over 3.5 goals
         self.df_pred = pd.DataFrame()
+        self.betconfig = BettingConfig()
+        self.current_file = None
+        self.current_model_file = None
+        self.x_path = None
+        self.y_path = None
+        self.mercados_selecionados = [
+            "BTTS",
+            "OVER 2.5",
+            "OVER 3.5",
+            "UNDER 1.5",
+            "UNDER 2.5",
+            "UNDER 3.5",
+        ]
+        self.current_y_table_file = None
         # Variáveis para valores de stake
-        self.stake_alta = tk.DoubleVar(value=25.0)
-        self.stake_media = tk.DoubleVar(value=15.0)
-        self.stake_baixa = tk.DoubleVar(value=5.0)
-        # Variáveis para níveis de confiança
-        self.nivel_alta = tk.DoubleVar(value=0.70)
-        self.nivel_media = tk.DoubleVar(value=0.60)
-        self.nivel_baixa = tk.DoubleVar(value=0.50)
-    def gerar_previsoes(self, hora_atual, num_horas,mercados_selecionados, mercado_treeview):
+        self.stake_alta = tk.DoubleVar(value=self.betconfig.stake_alta_pct)
+        self.stake_media =tk.DoubleVar(value=self.betconfig.stake_media_pct)
+        self.stake_baixa =tk.DoubleVar(value=self.betconfig.stake_baixa_pct)
+        # Variáveis para n# Variáveis para
+        self.nivel_alta = tk.DoubleVar(value=self.betconfig.conf_alta )
+        self.nivel_media =tk.DoubleVar(value=self.betconfig.conf_media_min)
+        self.nivel_baixa =tk.DoubleVar(value=self.betconfig.conf_baixa_min)
+        self.current_table_input_file =None
+        self.current_table_file =None
+        self.old_x_path = None
+        self.old_y_path = None
+        self.train = tk.BooleanVar(value=True)
+        self.create = tk.BooleanVar(value=True)
+    def gerar_previsoes(self, hora_atual, num_horas, tree_frame, mercado, create, train):
+        """
+        Gera previsões para os mercados selecionados e popula os treeviews correspondentes.
+        """
+        if (self.x_path and not self.y_path) or (not self.x_path and self.y_path):
+            messagebox.showerror('Erro','Se dados de treino ou de compare forem selecionados, o outro tambem deve ser selecionado.')
+            return
+        for widget in tree_frame.winfo_children():
+            widget.destroy()
+        self.rodar_previsao(create, train,horas=hora_atual, max=num_horas)
+        self.current_table_file = None
         self.load_data(True)
-        self.setup_treeview(mercado_treeview)
         df = self.df_prev
+        df_filtrado = df
+        scroll_y = tk.Scrollbar(tree_frame, orient="vertical")
+        scroll_x = tk.Scrollbar(tree_frame, orient="horizontal")
+        
+        tree = ttk.Treeview(tree_frame, yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+        scroll_y.config(command=tree.yview)
+        scroll_x.config(command=tree.xview)
+        if mercado == "BTTS":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        elif mercado == "OVER 2.5":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        elif mercado == "OVER 3.5":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        elif mercado == "UNDER 1.5":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        elif mercado == "UNDER 2.5":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        elif mercado == "UNDER 3.5":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        elif mercado == "MERCADOS":
+            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        
+
+    def filter_by_time(self, df, hora_atual, num_horas):
+        """Filter dataframe rows where HORA is within the next num_horas from hora_atual."""
         try:
-            # Verificar quais mercados estão selecionados
-            if mercados_selecionados.lower()=='btts':
-                
-                self.filter_btts(mercado_treeview, df, hora_atual, num_horas)
+            df = df.copy()  # Prevent SettingWithCopyWarning
             
-            if mercados_selecionados.lower()=='over25':
-                self.filter_over25(mercado_treeview, df, hora_atual, num_horas)
-            
-            if mercados_selecionados.lower()=='over35':
-                self.filter_over35(mercado_treeview, df, hora_atual, num_horas)
-            
-            
+            # Try converting 'HORA' to hour if it's not numeric
+            if df['HORA'].dtype == 'O':  # object, likely string
+                df['HORA'] = pd.to_datetime(df['HORA'], format='%H:%M', errors='coerce').dt.hour
+
+            df['HORA'] = pd.to_numeric(df['HORA'], errors='coerce')
+
+            hora_min = hora_atual
+            hora_max = hora_atual + num_horas
+
+            print("Filtering between", hora_min, "and", hora_max)
+            print("Before filtering, df shape:", df.shape)
+
+            df_filtered = df[df['HORA'] >= hora_min]
+            df_filtered = df[df_filtered['HORA'] <= hora_max]
+
+            print("After filtering, df shape:", df_filtered.shape)
+
+            return df
+
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao gerar previsões: {str(e)}")
-    
+            print(f"Error in filter_by_time: {e}")
+            return df
 
-
-    def setup_treeview(self,tree):
-        # Clear existing data and columns
-        tree.delete(*tree.get_children())
-        tree["columns"] = ("hora", "campeonato", "coluna", "probabilidade", "outcome", 
-                        "prediction", "probability", "confidence", "stake")
+    def populate_treeview(self, tree, filtered_df,scroll_y,scroll_x):
         
-        # Define column headings
-        tree.heading("#0", text="ID")
-        tree.heading("hora", text="Hora")
-        tree.heading("campeonato", text="Campeonato")
-        tree.heading("coluna", text="Coluna")
-        tree.heading("probabilidade", text="Probabilidade")
-        tree.heading("outcome", text="Outcome")
-        tree.heading("prediction", text="Prediction")
-        tree.heading("probability", text="Probability")
-        tree.heading("confidence", text="Confidence")
-        tree.heading("stake", text="Stake")
+        # Carrega os dados do CSV
+        df = filtered_df
+
+        # Limpa a tabela atual
+        for item in tree.get_children():
+            tree.delete(item)
+
+        # Define novas colunas com base no CSV
+        tree["columns"] = list(df.columns)
+        tree["show"] = "headings"
+
+        # Define o cabeçalho das colunas
+        for coluna in df.columns:
+            tree.heading(coluna, text=coluna)
+            tree.column(coluna, anchor="center", width=100)
+
+        # Insere as linhas na tabela
+        for _, row in df.iterrows():
+            tree.insert("", "end", values=list(row))
         
-        # Configure column widths
-        tree.column("#0", width=40)
-        tree.column("hora", width=50)
-        tree.column("campeonato", width=100)
-        tree.column("coluna", width=60)
-        tree.column("probabilidade", width=100)
-        tree.column("outcome", width=70)
-        tree.column("prediction", width=80)
-        tree.column("probability", width=80)
-        tree.column("confidence", width=80)
-        tree.column("stake", width=60)
+        tree.pack(fill="both", expand=True)
+        scroll_y.pack(side="right", fill="y")
+        scroll_x.pack(side="bottom", fill="x")
 
-    def filter_by_time(self,df, hora_atual, num_horas):
-        """Filter dataframe by time range"""
-        hora_min = hora_atual
-        hora_max = hora_atual + num_horas
-        return df[(df['HORA'] >= hora_min) & (df['HORA'] <= hora_max)]
+                
 
-    def populate_treeview(self,tree, filtered_df):
-        """Populate treeview with filtered data"""
-        self.setup_treeview(tree)
-        for i, row in filtered_df.iterrows():
-            tree.insert("", "end", text=str(i), 
-                    values=(row['HORA'], row['CAMPEONATO'], row['COLUNA'],
-                            row['PROBABILIDADE'], row['OUTCOME'],
-                            row['PREDICTION'], row['PROBABILITY'],
-                            row['CONFIDENCE_LEVEL'], row['RECOMMENDED_STAKE']))
 
     # Specific filter functions
     def filter_over25(self,tree, df, hora_atual=0, num_horas=24):
-        filtered = self.filter_by_time(df, hora_atual, num_horas)
-        filtered = filtered[filtered['PREDICTION'] == 'over25']  # Adjust column name as needed
-        self.populate_treeview(tree, filtered)
+        # Your filtering logic here
+        df_filtered = df[(df['MERCADO'] == 'OVER 2.5')]  # Simplified example
+        # Add any other filters like HORA range
+        return df_filtered
 
     def filter_over35(self,tree, df, hora_atual=0, num_horas=24):
-        filtered = self.filter_by_time(df, hora_atual, num_horas)
-        filtered = filtered[filtered['PREDICTION'] == 'over35']  # Adjust column name as needed
-        self.populate_treeview(tree, filtered)
+        # Your filtering logic here
+        df_filtered = df[(df['MERCADO'] == 'OVER 3.5')]  # Simplified example
+        # Add any other filters like HORA range
+        return df_filtered
 
     def filter_under25(self,tree, df, hora_atual=0, num_horas=24):
-        filtered = self.filter_by_time(df, hora_atual, num_horas)
-        filtered = filtered[filtered['PREDICTION'] == 'under25']  # Adjust column name as needed
-        self.populate_treeview(tree, filtered)
+        # Your filtering logic here
+        df_filtered = df[(df['MERCADO'] == 'UNDER 2.5')]  # Simplified example
+        # Add any other filters like HORA range
+        return df_filtered
 
     def filter_under35(self,tree, df, hora_atual=0, num_horas=24):
-        filtered = self.filter_by_time(df, hora_atual, num_horas)
-        filtered = filtered[filtered['PREDICTION'] == 'under35']  # Adjust column name as needed
-        self.populate_treeview(tree, filtered)
+        # Your filtering logic here
+        df_filtered = df[(df['MERCADO'] == 'UNDER 3.5')]  # Simplified example
+        # Add any other filters like HORA range
+        return df_filtered
 
     def filter_under15(self,tree, df, hora_atual=0, num_horas=24):
-        filtered = self.filter_by_time(df, hora_atual, num_horas)
-        filtered = filtered[filtered['PREDICTION'] == 'under15']  # Adjust column name as needed
-        self.populate_treeview(tree, filtered)
+        # Your filtering logic here
+        df_filtered = df[(df['MERCADO'] == 'UNDER 1.5')]  # Simplified example
+        # Add any other filters like HORA range
+        return df_filtered
 
     def filter_btts(self,tree, df, hora_atual=0, num_horas=24):
-        filtered = self.filter_by_time(df, hora_atual, num_horas)
-        filtered = filtered[filtered['PREDICTION'] == 'btts']  # Adjust column name as needed
-        self.populate_treeview(tree, filtered)
+        # Your filtering logic here
+        df_filtered = df[(df['MERCADO'] == 'BTTS')]  # Simplified example
+        # Add any other filters like HORA range
+        return df_filtered
+    
     def load_data(self,flag=False):
         if flag:
-            self.df_prev = pd.read_csv(get_most_recent_file_prev('pred','generated/'))
+            if self.current_table_file:
+                self.df_prev = pd.read_csv(self.current_table_file)
+            else:
+                self.df_prev = pd.read_csv(get_most_recent_file_prev('pred','../generated'))
             return
-        df = pd.read_csv(get_most_recent_file_prev('tabela','generated/'))
+        if self.current_table_file:
+            df = pd.read_csv(self.current_table_file)
+        else:
+            df = pd.read_csv(get_most_recent_file_prev('pred','../generated'))
+        
         df['OCORRENCIA'] = (df['Gols time casa'] > 0) & (df['Gols time contra'] > 0)
           
         self.df_btts = df.copy()
@@ -151,24 +211,11 @@ class Service:
         self.df_pred['HORA'] = pd.to_datetime(self.df_pred['Tempo'], format='%H:%M').dt.hour
         self.df_table['HORA'] = pd.to_datetime(self.df_table['Tempo'], format='%H:%M').dt.hour
         
-    
-    
         
-        
-        
-        
-        
-    
-        
-
-    
-    
-    
-    
     def carregar_previsoes(self):
         try:
             df = self.df_pred
-            self.load_data()
+            self.load_data(True)
             # Limpa a tabela
             for item in self.treeview_tabela.get_children():
                 self.treeview_tabela.delete(item)
@@ -199,134 +246,52 @@ class Service:
         Extrai features relevantes do dataframe de partidas.
         """
         features = []
-        
-        for index, row in df.iterrows():
-            # Features we might extract (you can expand this)
-            time_casa = row['Time da casa']
-            time_contra = row['Time contra']
-            gols_time_casa = row['Gols time casa']
-            gols_time_contra = row['Gols time contra']
-            odd_over_2_5 = row['Odd Over 2.5']
-            odd_under_2_5 = row['Odd Under 2.5']
-            odd_over_3_5 = row['Odd Over 3.5']
-            odd_under_3_5 = row['Odd Under 3.5']
-            odd_casa_vence = row['Odd Casa Vence']
-            odd_empate = row['Odd Empate']
-            odd_visitante_vence = row['Odd Visitante Vence']
-            
-            # Example of extracting the total goals
-            total_gols = gols_time_casa + gols_time_contra
-            
-            # Combine features into a dictionary
-            features.append({
-                'TIME_CASA': time_casa,
-                'TIME_CONTRA': time_contra,
-                'GOLS_TIME_CASA': gols_time_casa,
-                'GOLS_TIME_CONTRA': gols_time_contra,
-                'TOTAL_GOLS': total_gols,
-                'ODD_OVER_2_5': odd_over_2_5,
-                'ODD_UNDER_2_5': odd_under_2_5,
-                'ODD_OVER_3_5': odd_over_3_5,
-                'ODD_UNDER_3_5': odd_under_3_5,
-                'ODD_CASA_VENCE': odd_casa_vence,
-                'ODD_EMPATE': odd_empate,
-                'ODD_VISITANTE_VENCE': odd_visitante_vence
-            })
-        
-        # Return as a DataFrame for easier manipulation
-        return pd.DataFrame(features)
-
-    def rodar_previsao(self, treeview):
-        """Executa a previsão com base no modelo treinado"""
         try:
-            from ml.implementacao_drisamanus_corrigida import predict
+
+            for index, row in df.iterrows():
+                # Features we might extract (you can expand this)
+                time_casa = row['Time da casa']
+                time_contra = row['Time contra']
+                gols_time_casa = row['Gols time casa']
+                gols_time_contra = row['Gols time contra']
+                odd_over_2_5 = row['Odd Over 2.5']
+                odd_under_2_5 = row['Odd Under 2.5']
+                odd_over_3_5 = row['Odd Over 3.5']
+                odd_under_3_5 = row['Odd Under 3.5']
+                odd_casa_vence = row['Odd Casa Vence']
+                odd_empate = row['Odd Empate']
+                odd_visitante_vence = row['Odd Visitante Vence']
+                
+                # Example of extracting the total goals
+                total_gols = gols_time_casa + gols_time_contra
+                
+                # Combine features into a dictionary
+                features.append({
+                    'TIME_CASA': time_casa,
+                    'TIME_CONTRA': time_contra,
+                    'GOLS_TIME_CASA': gols_time_casa,
+                    'GOLS_TIME_CONTRA': gols_time_contra,
+                    'TOTAL_GOLS': total_gols,
+                    'ODD_OVER_2_5': odd_over_2_5,
+                    'ODD_UNDER_2_5': odd_under_2_5,
+                    'ODD_OVER_3_5': odd_over_3_5,
+                    'ODD_UNDER_3_5': odd_under_3_5,
+                    'ODD_CASA_VENCE': odd_casa_vence,
+                    'ODD_EMPATE': odd_empate,
+                    'ODD_VISITANTE_VENCE': odd_visitante_vence
+                })
             
-            # 1. Carregar dados e verificar arquivos
-            self.load_data()
-            
-            # Obter arquivo de entrada
-            try:
-                input_csv = get_most_recent_file_prev('tabela', 'generated')
-                if not os.path.exists(input_csv):
-                    raise FileNotFoundError(f"Arquivo de entrada não encontrado: {input_csv}")
-                print(f"Arquivo de entrada válido: {input_csv}")
-            except Exception as e:
-                raise ValueError(f"Erro ao localizar arquivo de dados: {str(e)}")
-
-            # Verificar modelo
-            model_path = "./generated/model.pkl"
-            if not os.path.exists(model_path):
-                raise FileNotFoundError(f"Modelo não encontrado: {model_path}")
-
-            # 2. Configurar saída
-            output_dir = "../generated"
-            os.makedirs(output_dir, exist_ok=True)
-            output_csv = os.path.join(
-                output_dir,
-                f"pred_{datetime.now().strftime('%d-%m-%Y_%H-%M-%S')}.csv"
-            )
-
-            # 3. Executar previsão
-            execute(True,self.get_current_config())  # Seu método de execução existente
-            
-            # 4. Processar resultados
-            pred_file = get_most_recent_file_prev('pred', 'generated')
-            df_previsoes = pd.read_csv(pred_file)
-            
-            # Verificar resultados
-            if df_previsoes.empty:
-                self.status_label.config(text="Nenhuma previsão gerada (arquivo vazio)")
-                messagebox.showinfo("Informação", "Nenhuma previsão foi gerada para os dados atuais.")
-                return
-
-            # 5. Mapear colunas (INGLÊS -> PORTUGUÊS)
-            column_map = {
-                'PREDICTION': 'PREDICAO',
-                'PROBABILITY': 'PROBABILIDADE',
-                'Tempo': 'HORA',
-                'Time da casa': 'COLUNA'  # Ajuste conforme necessário
-            }
-            df_previsoes = df_previsoes.rename(columns=column_map)
-
-            # 6. Validar colunas obrigatórias
-            required_columns = {
-                'PREDICAO': int,
-                'PROBABILIDADE': float,
-                'Campeonato': str,
-                'HORA': str,
-                'COLUNA': str
-            }
-            
-            missing = [col for col in required_columns if col not in df_previsoes.columns]
-            if missing:
-                raise ValueError(f"Colunas faltando após mapeamento: {', '.join(missing)}")
-
-            # Converter tipos
-            for col, dtype in required_columns.items():
-                df_previsoes[col] = df_previsoes[col].astype(dtype)
-
-            # 7. Exibir na interface
-            self.limpar_treeview("over25")
-            for i, row in df_previsoes.iterrows():
-                treeview_over25.insert("", "end", values=(
-                    row['Campeonato'],
-                    i + 1,
-                    f"{row['HORA']}:{row['COLUNA']}",
-                    "CASA" if row['PREDICAO'] == 1 else "FORA",
-                    f"{row['PROBABILIDADE']*100:.1f}%",
-                    "1 UNIDADE",
-                    "",
-                    "SIM" if row['PREDICAO'] == 1 else "NÃO"
-                ))
-
-            # 8. Feedback
-            success_msg = f"{len(df_previsoes)} previsões processadas\nSalvo em: {output_csv}"
-            self.status_label.config(text=success_msg)
-            messagebox.showinfo("Sucesso", success_msg)
-
+            # Return as a DataFrame for easier manipulation
+            return pd.DataFrame(features)
         except Exception as e:
-            error_msg = f"Falha na previsão: {str(e)}"
-            messagebox.showerror("Erro", error_msg)
+            print(e)
+
+    def rodar_previsao(self, create, train, horas, max):
+        """Executa a previsão com base no modelo treinado"""
+        execute(max=max,hora=horas, config=self.get_current_config(),input_csv=self.current_table_file,actuals_path=f'../generated/actuals_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',pred_path=f'../generated/pred_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv', model_path=self.current_model_file,x_path=self.x_path,y_path=self.y_path,train=train,create=create)
+            
+          
+        messagebox.showinfo("Sucesso", 'Previsões criadas.')
     def get_current_config(self):
         """Helper method to extract current config"""
         return {
@@ -342,7 +307,8 @@ class Service:
         }
     
     def processar_previsoes(self):
-        execute(just_predict=False,config=self.get_current_config())
+        execute(self.get_current_config(),input_csv=self.current_table_file,actuals_path=self.current_table_file,pred_path=f'../generated/pred_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',history_path=f'../generated/historico_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv', model_path=self.current_model_file,x_path=f'../generated/x_in_novo_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',y_path=f'../generated/y_out_novo_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',x_old_path=self.old_x_path+'.csv',y_old_path=self.old_y_path+'.csv',train=self.train.get(),create=self.create.get())
+            
         messagebox.showinfo(title='Sucesso',message='Previsões geradas com sucesso.')
     
 
@@ -444,13 +410,13 @@ class Service:
         """Carrega os dados das partidas na tabela"""
         try:
             from ml.implementacao_drisamanus_corrigida import generate_actuals
-            generate_actuals()
+            file_path = filedialog.askopenfilename(title="Selecione um Arquivo", filetypes=[("Todos os Arquivos", "*.*")])
             # Limpar tabela existente
             for item in treeview_tabela.get_children():
                 treeview_tabela.delete(item)
                 
             # Carregar dados (substitua por sua fonte de dados real)
-            dados = self.obter_dados_partidas()  # Implemente este método
+            dados = self.obter_dados_partidas(file_path)  # Implemente este método
             
             # Preencher tabela
             for partida in dados:
@@ -478,12 +444,39 @@ class Service:
                 
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao carregar dados: {str(e)}")
-
-
-    def obter_dados_partidas(self):
+    def open_file(self, type, path):
         
-        self.load_data()
-        df = self.df_table
+        file_path = filedialog.askopenfilename(title="Selecione um Arquivo", filetypes=[("Todos os Arquivos", "*.*")])
+        if type=='tabela':
+            self.current_table_file = file_path
+            
+        if type=='modelo':
+            self.current_model_file = file_path
+        if type=='tabela_y':
+            self.current_y_table_file = file_path
+        if type=='x_file':
+            self.x_path = file_path
+        if type=='y_file':
+            self.y_path = file_path
+        path.set(os.path.basename(file_path))
+    def create_file(self, table_label,model_label,x_label,y_label):
+        self.current_table_input_file =None
+        self.current_table_file =None
+        self.old_x_path = None
+        self.old_y_path = None
+        self.train = tk.Variable(value=False)
+        self.create = tk.Variable(value=False)
+        self.x_path = None
+        self.y_path = None
+        table_label.set('')
+        model_label.set('')
+        x_label.set('')
+        y_label.set('')
+
+    def obter_dados_partidas(self, file_path):
+        
+        
+        df = pd.read_csv(file_path)
         
         # Padroniza os nomes das colunas
         df.columns = (
@@ -506,27 +499,21 @@ class Service:
     def carregar_configuracoes(self):
         """Carrega as configurações salvas"""
         try:
-            import json
-            # Verificar se o arquivo de configuração existe
-            config_path = "generated/grisamanus_config.json"
-            if not os.path.exists(config_path):
-                messagebox.showwarning("Aviso", "Nenhum arquivo de configuração encontrado!")
-                return False
-            
-            # Carregar o arquivo JSON
-            with open(config_path, "r") as f:
-                config = json.load(f)
-            
-            return config
-            
+            gui_config = self.betconfig.load_config()
+            self.nivel_alta.set(gui_config['conf_alta']),
+            self.nivel_media.set(gui_config['conf_media_min']),
+            self.nivel_baixa.set(gui_config['conf_baixa_min']),
+            self.stake_alta.set(gui_config['stake_alta_pct']),
+            self.stake_media.set(gui_config['stake_media_pct']),
+            self.stake_baixa.set(gui_config['stake_baixa_pct'])
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao carregar configurações: {str(e)}")
             return False
     
     def limpar_treeview(self, treeview):
         """Limpa o treeview de um mercado específico"""
-        for item in treeview.get_children():
-            treeview.delete(item)
+        for widget in treeview.winfo_children():
+            widget.destroy()
     
     def exportar_csv(self, treeview):
         """Exporta as previsões de um mercado para CSV"""
@@ -676,14 +663,14 @@ class Service:
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao exportar previsões: {str(e)}")
     
-    
+
     
     
     
     def exportar_tabela_csv(self, mercado):
         """Exporta a tabela operacional de um mercado para CSV"""
         # Caminho para o arquivo CSV
-        arquivo = f"/home/ubuntu/tabelas_operacionais/tabela_operacional_{mercado}.csv"
+        arquivo = create_dated_filename(directory='../generated', extension='csv', name=mercado)
         
         if not os.path.exists(arquivo):
             messagebox.showerror("Erro", f"Tabela não encontrada: {arquivo}")
@@ -714,21 +701,20 @@ class Service:
         try:
             # Criar dicionário com configurações
             config = {
-                "stake": {
-                    "ALTA": self.stake_alta.get(),
-                    "MEDIA": self.stake_media.get(),
-                    "BAIXA": self.stake_baixa.get()
-                },
-                "niveis_confianca": {
-                    "ALTA": self.nivel_alta.get(),
-                    "MEDIA": self.nivel_media.get(),
-                    "BAIXA": self.nivel_baixa.get()
-                }
-            }
+            "conf_alta": self.nivel_alta.get(),
+            "conf_media_min": self.nivel_media.get(),
+            "conf_media_max": 0,
+            "conf_baixa_min": self.nivel_baixa.get(),
+            "conf_baixa_max": 0,
+            "stake_base": 0,
+            "stake_alta_pct": self.stake_alta.get(),
+            "stake_media_pct": self.stake_media.get(),
+            "stake_baixa_pct": self.stake_baixa.get()
+        }
             
             # Salvar em arquivo JSON
             import json
-            with open("generated/grisamanus_config.json", "w") as f:
+            with open("../generated/grisamanus_config.json", "w") as f:
                 json.dump(config, f, indent=4)
             
             messagebox.showinfo("Sucesso", "Configurações salvas com sucesso!")

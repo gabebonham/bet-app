@@ -1,8 +1,10 @@
 import json
 import sys
 import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 class BettingConfig:
 
 
@@ -60,42 +62,51 @@ class BettingConfig:
             'stake_base': self.stake_base,
             'stake_alta_pct': self.stake_alta_pct,
             'stake_media_pct': self.stake_media_pct,
-            'stake_baixa_pct': self.stake_baixa_pct
+            'stake_baixa_pct': self.stake_baixa_pct,
+            'nivel_alta':self.conf_alta,
+            'nivel_media':self.conf_media_min,
+            'nivel_baixa':self.conf_baixa_min,
+            'stake_alta':self.stake_alta_pct,
+            'stake_media':self.stake_media_pct,
+            'stake_baixa':self.stake_baixa_pct
         }
     
-    @classmethod
-    def from_dict(cls, config_dict):
+    
+    def from_dict(self, config_dict):
         """Robust dictionary conversion that handles both GUI and native formats"""
         # First check if it's a GUI-style config
-        if 'niveis_confianca' in config_dict and 'stake' in config_dict:
-            gui_config = config_dict
-            return cls(
-                conf_alta=gui_config['niveis_confianca']['ALTA'],
-                conf_media_min=gui_config['niveis_confianca']['MEDIA'],
-                conf_media_max=min(gui_config['niveis_confianca']['MEDIA'] + 0.09, 0.99),
-                conf_baixa_min=gui_config['niveis_confianca']['BAIXA'],
-                conf_baixa_max=min(gui_config['niveis_confianca']['BAIXA'] + 0.14, 0.69),
-                stake_base=20.00,  # Default from class
-                stake_alta_pct=gui_config['stake']['ALTA'],
-                stake_media_pct=gui_config['stake']['MEDIA'],
-                stake_baixa_pct=gui_config['stake']['BAIXA']
-            )
-        # Otherwise assume it's a native config format
-        else:
-            # Fill missing values with defaults
-            defaults = {
-                'conf_media_max': min(config_dict.get('conf_media_min', 0.70) + 0.09, 0.99),
-                'conf_baixa_max': min(config_dict.get('conf_baixa_min', 0.55) + 0.14, 0.69),
-                'stake_base': 20.00
-            }
-            merged = {**defaults, **config_dict}
-            return cls(**merged)
+        
+        gui_config = config_dict
+        
+        self.conf_alta=gui_config['conf_alta']
+        self.conf_media_min=gui_config['conf_media_min']
+        self.conf_media_max=gui_config['conf_media_max']
+        self.conf_baixa_min=gui_config['conf_baixa_min']
+        self.conf_baixa_max=gui_config['conf_baixa_max']
+        self.stake_base=20.00  # Default from class
+        self.stake_alta_pct=gui_config['stake_alta_pct']
+        self.stake_media_pct=gui_config['stake_media_pct']
+        self.stake_baixa_pct=gui_config['stake_baixa_pct']
+        return {
+            'conf_alta':self.conf_alta,
+            'conf_media_min':self.conf_media_min,
+            'conf_media_max':self.conf_media_max,
+            'conf_baixa_min':self.conf_baixa_min,
+            'conf_baixa_max':self.conf_baixa_max,
+            'stake_base':20.0,
+            'stake_alta_pct':self.stake_alta_pct,
+            'stake_media_pct':self.stake_media_pct,
+            'stake_baixa_pct':self.stake_baixa_pct
+        }
+        
     def save_config(config, path):
         """Save configuration to JSON file"""
-        with open(path, 'w') as f:
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "../generated/grisamanus_config.json"))) as f:
             json.dump(config.to_dict(), f, indent=2)
 
-    def load_config(path):
+    def load_config(self):
         """Load configuration from JSON file"""
-        with open(path) as f:
-            return BettingConfig.from_dict(json.load(f))
+        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "../generated/grisamanus_config.json"))) as f:
+            conf = json.load(f)
+            self.from_dict(conf)
+            return conf
