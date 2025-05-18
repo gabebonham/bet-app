@@ -2,8 +2,102 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import os
-from services.file_util import get_most_recent_file
+import sys
 
+from app.services.file_util import get_most_recent_file
+def get_base_path():
+    import os
+
+    # get the current working directory
+    current_working_directory = os.getcwd()
+    return current_working_directory
+
+def get_generated_path():
+    """Get the correct path to generated files"""
+    base = get_base_path()
+    path = os.path.join(base,'..','generated')
+    return path
+BASE_DIR = get_base_path()
+GENERATED_PATH = get_generated_path()
+# from app.file_util import get_most_recent_file
+# Parâmetros de confiança e stake (mantém lógica original)
+def get_script_relative_path(relative_path):
+    """Convert relative path to be based on this script's location"""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.normpath(os.path.join(GENERATED_PATH, relative_path))
+
+import os
+import glob
+import sys
+from pathlib import Path
+from datetime import datetime
+
+def get_most_recent_file(base_name, extension):
+    """
+    Finds the most recent file in the generated directory matching the pattern:
+    base_name_DD-MM-YYYY_HH-MM-SS.extension
+    
+    Args:
+        base_name (str): The base name of the file (e.g., "predictions")
+        extension (str): File extension without dot (e.g., "csv")
+    
+    Returns:
+        str: Full path to the most recent matching file
+        None: If no matching file is found
+    """
+    # Determine the correct generated directory path
+    if getattr(sys, 'frozen', False):
+        # Running in PyInstaller bundle
+        if hasattr(sys, '_MEIPASS'):
+            # Try MEIPASS first
+            gen_dir = Path(sys._MEIPASS) / 'generated'
+        else:
+            # Fallback to executable directory
+            gen_dir = Path(sys.executable).parent / 'generated'
+    else:
+        # Running in development
+        gen_dir = Path(__file__).parent.parent / 'generated'
+    
+    # Build search pattern
+    pattern = os.path.join(get_generated_path(), f"{base_name}_*.{extension}")
+    
+    # Find all matching files
+    files = glob.glob(pattern)
+    
+    if not files:
+        return None
+    
+    # Find the most recently created file
+    most_recent = max(files, key=os.path.getctime)
+    
+    return most_recent
+
+conf_alta = 0.80
+conf_media_min = 0.70
+conf_media_max = 0.79
+conf_baixa_min = 0.55
+conf_baixa_max = 0.69
+stake_base = 20.00
+stake_alta_pct = 100
+stake_media_pct = 50
+stake_baixa_pct = 25
+def create_dated_filename(name, extension="pkl", directory="."):
+    """
+    Creates a filename with the format: name_DD-MM-YYYY_HH-MM-SS.ext
+
+    Args:
+        name (str): Base name of the file (e.g., 'model')
+        extension (str): File extension without dot (e.g., 'pkl', 'csv')
+        directory (str): Directory where the file will be placed
+
+    Returns:
+        str: Full path to the new dated file
+    """
+    timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+    filename = f"{name}_{timestamp}.{extension}"
+    directory = os.path.join('..',directory)
+    full_path = os.path.join(get_generated_path(), filename)
+    return full_path
 class BetMarketVisualizer:
     def __init__(self, output_dir='../temp_plots'):
         self.output_dir = output_dir
@@ -448,8 +542,8 @@ class BetMarketVisualizer:
 if __name__ == "__main__":
     try:
         # Load data
-        pred_df = pd.read_csv(get_most_recent_file("pred", '.'))
-        table_df = pd.read_csv(get_most_recent_file("table", '..'))
+        pred_df = pd.read_csv(get_most_recent_file("pred", 'csv'))
+        table_df = pd.read_csv(get_most_recent_file("table", 'csv'))
         
         # Initialize and run visualizer
         visualizer = BetMarketVisualizer(output_dir='./temp_plots')

@@ -1,9 +1,6 @@
 import json
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 class BettingConfig:
 
@@ -29,7 +26,18 @@ class BettingConfig:
         self.stake_alta_pct = stake_alta_pct
         self.stake_media_pct = stake_media_pct
         self.stake_baixa_pct = stake_baixa_pct
-    
+    def get_base_path(self):
+        import os
+
+        # get the current working directory
+        current_working_directory = os.getcwd()
+        return current_working_directory
+
+    def get_generated_path(self):
+        """Get the correct path to generated files"""
+        base = self.get_base_path()
+        path = os.path.join(base,'app','generated')
+        return path
     def calibrar_confianca(self, prob):
         """Determine confidence level based on probability"""
         if prob >= self.conf_alta:
@@ -99,14 +107,15 @@ class BettingConfig:
             'stake_baixa_pct':self.stake_baixa_pct
         }
         
-    def save_config(config, path):
+    def save_config(self,config, path):
         """Save configuration to JSON file"""
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "../generated/grisamanus_config.json"))) as f:
+        with open(os.path.join(self.get_generated_path(),'grisamanus_config.json')) as f:
             json.dump(config.to_dict(), f, indent=2)
+        self.load_config()
 
     def load_config(self):
         """Load configuration from JSON file"""
-        with open(os.path.abspath(os.path.join(os.path.dirname(__file__), "../generated/grisamanus_config.json"))) as f:
+        with open(os.path.join(self.get_generated_path(),'grisamanus_config.json')) as f:
             conf = json.load(f)
             self.from_dict(conf)
             return conf

@@ -10,10 +10,9 @@ from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from services.service import Service
-from view.graphs.visualizer import BetMarketVisualizer
+
+from app.services.service import Service
+from app.view.graphs.visualizer import BetMarketVisualizer
 class Graph:
     def __init__(self):
         self.service = Service()

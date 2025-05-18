@@ -3,19 +3,36 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.multioutput import MultiOutputRegressor
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingRegressor
 from sklearn.metrics import classification_report, roc_auc_score, mean_squared_error
 import joblib
 from sklearn.base import clone
-
+import sys
 import os
 import pickle
 from datetime import datetime
 from sklearn.model_selection import train_test_split
-from ml.betting_config import BettingConfig
+import pathlib
+from tkinter import messagebox
+from pathlib import Path
+from app.ml.betting_config import BettingConfig
+from app.bet.main import execute_api_call
+from sklearn.preprocessing import LabelEncoder
+def get_base_path():
+    import os
 
-BASE_DIR = os.path.join(os.path.dirname(__file__))
-GENERATED_PATH = os.path.join(BASE_DIR, '../generated')
+    # get the current working directory
+    current_working_directory = os.getcwd()
+    return current_working_directory
+
+def get_generated_path():
+    """Get the correct path to generated files"""
+    base = get_base_path()
+    path = os.path.join(base,'app','generated')
+    return path
+BASE_DIR = get_base_path()
+GENERATED_PATH = get_generated_path()
 # from app.file_util import get_most_recent_file
 # Parâmetros de confiança e stake (mantém lógica original)
 def get_script_relative_path(relative_path):
@@ -23,51 +40,51 @@ def get_script_relative_path(relative_path):
     script_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.normpath(os.path.join(GENERATED_PATH, relative_path))
 
-def get_most_recent_file(name, directory="."):
-    """Find most recent file with pattern name_*.csv"""
-    abs_dir = get_script_relative_path(directory)
-    pattern = os.path.join(GENERATED_PATH, f"{name}_*.csv")
+import os
+import glob
+import sys
+from pathlib import Path
+from datetime import datetime
+
+def get_most_recent_file(base_name, extension):
+    """
+    Finds the most recent file in the generated directory matching the pattern:
+    base_name_DD-MM-YYYY_HH-MM-SS.extension
+    
+    Args:
+        base_name (str): The base name of the file (e.g., "predictions")
+        extension (str): File extension without dot (e.g., "csv")
+    
+    Returns:
+        str: Full path to the most recent matching file
+        None: If no matching file is found
+    """
+    # Determine the correct generated directory path
+    if getattr(sys, 'frozen', False):
+        # Running in PyInstaller bundle
+        if hasattr(sys, '_MEIPASS'):
+            # Try MEIPASS first
+            gen_dir = Path(sys._MEIPASS) / 'generated'
+        else:
+            # Fallback to executable directory
+            gen_dir = Path(sys.executable).parent / 'generated'
+    else:
+        # Running in development
+        gen_dir = Path(__file__).parent.parent / 'generated'
+    
+    # Build search pattern
+    pattern = os.path.join(get_generated_path(), f"{base_name}_*.{extension}")
+    
+    # Find all matching files
     files = glob.glob(pattern)
     
     if not files:
         return None
     
-    dated_files = []
-    for f in files:
-        try:
-            # Extract date from filename (pattern: name_DD-MM-YYYY_HH-MM-SS.csv)
-            date_str = os.path.basename(f)[len(name)+1:-4]
-            dt = datetime.strptime(date_str, "%d-%m-%Y_%H-%M-%S")
-            dated_files.append((dt, f))
-        except ValueError:
-            continue
+    # Find the most recently created file
+    most_recent = max(files, key=os.path.getctime)
     
-    if not dated_files:
-        return None
-    
-    return max(dated_files, key=lambda x: x[0])[1]
-def get_most_recent_file_pkl(name, directory="."):
-    """Find most recent file with pattern name_*.pkl"""
-    abs_dir = get_script_relative_path(name)
-    pattern = os.path.join(GENERATED_PATH, f"{name}_*.pkl")
-    files = glob.glob(pattern)
-    
-    if not files:
-        return None
-    dated_files = []
-    for f in files:
-        try:
-            # Extract date from filename (pattern: name_DD-MM-YYYY_HH-MM-SS.csv)
-            date_str = os.path.basename(f)[len(name)+1:-4]
-            dt = datetime.strptime(date_str, "%d-%m-%Y_%H-%M-%S")
-            dated_files.append((dt, f))
-        except ValueError:
-            continue
-    
-    if not dated_files:
-        return None
-    
-    return max(dated_files, key=lambda x: x[0])[1]
+    return most_recent
 
 conf_alta = 0.80
 conf_media_min = 0.70
@@ -92,7 +109,8 @@ def create_dated_filename(name, extension="pkl", directory="."):
     """
     timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
     filename = f"{name}_{timestamp}.{extension}"
-    full_path = os.path.join(directory, filename)
+    directory = os.path.join('app',directory)
+    full_path = os.path.join(get_generated_path(), filename)
     return full_path
 # Dicionário de campeonatos e suas colunas
 campeonatos = {
@@ -196,7 +214,7 @@ def filter_by_time(df, hora_atual, num_horas):
         print("Filtering between", hora_min, "and", hora_max)
         print("Before filtering, df shape:", df.shape)
 
-        df = df[(df['HORA'] >=hora_max) & (df['HORA'] <= hora_max)]
+        df = df[(df['HORA'] >=hora_min) & (df['HORA'] <= hora_max)]
         print("after filtering, df shape:", df.shape)
 
 
@@ -266,138 +284,93 @@ def record_results(pred_csv, actuals_csv, history_csv,horas,max):
         
 
 
-def train_model(input_csv, x_path, y_path,model_path,x_old_path=None,y_old_path=None,error_weight=0.2):
+def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_path=None, error_weight=0.2):
     """
     Trains a DecisionTree model with multi-output support and proper preprocessing.
+    
+    Returns:
+        tuple: (X_test, y_test) DataFrames if successful, None if failed
     """
     try:
-        
-        print(model_path)
-        model = None
-        # 1. Load and convert data
-        try:
-            df = pd.read_csv(get_most_recent_file('actuals','../generated'))
-        except Exception as e:
-            pass
-        # Load existing model if exists
-        
-        try:
-            if model_path and os.path.exists(model_path):
-                with open(model_path, 'rb') as f:
-                    model = pickle.load(f)
-        except Exception as e:
-            pass  # You may want to log or print e for debugging
+        model = MultiOutputRegressor(GradientBoostingRegressor())
+        df = pd.read_csv(get_most_recent_file('historico','csv'))
+        df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+        df['Data das odds'] = pd.to_datetime(df['Data das odds'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
 
+        le_home = LabelEncoder()
+        le_away = LabelEncoder()
+        le_league = LabelEncoder()
+        le_placar_1= LabelEncoder()
+        le_placar_2 = LabelEncoder()
+        df['Data_ano'] = df['Data'].dt.year
+        df['Data_dia'] = df['Data'].dt.day
+        df['Data_mes'] = df['Data'].dt.month
+        df['Data das odds_ano'] = df['Data das odds'].dt.year
+        df['Data das odds_dia'] = df['Data das odds'].dt.day
+        df['Data das odds_mes'] = df['Data das odds'].dt.month
+        df['Data das odds_hr'] = df['Data das odds'].dt.hour
+        df['Data das odds_min'] = df['Data das odds'].dt.minute
         
-            
-        if not model:
-            model = DecisionTreeRegressor()
+        df[['Placar Exato_time_1', 'Placar Exato_time_2']] = df['Placar Exato'].str.split('-', expand=True)
         
-            
-        # Type conversions
-       
-        
-        df['OUTCOME'] = df['OUTCOME'].astype(int)
-        df['Campeonato'] = df['Campeonato'].astype(str)
-        df['Data das odds'] = pd.to_datetime(df['Data das odds'],  errors='coerce')
-        df['PROBABILIDADE'] = df['PROBABILIDADE'].astype(float)
-        df['Tempo'] = pd.to_datetime(df['Tempo'], format='%H:%M', errors='coerce')
-        df['Time da casa'] = df['Time da casa'].astype(str)
-        df['Time contra'] = df['Time contra'].astype(str)
-        df['Odd Over 2.5'] = df['Odd Over 2.5'].astype(float)
-        df['Odd Over 3.5'] = df['Odd Over 3.5'].astype(float)
-        df['Odd Under 2.5'] = df['Odd Under 2.5'].astype(float)
-        df['Odd Under 3.5'] = df['Odd Under 3.5'].astype(float)
-        df['Odd Casa Vence'] = df['Odd Casa Vence'].astype(float)
-        df['Odd Empate'] = df['Odd Empate'].astype(float)
-        df['Odd Visitante Vence'] = df['Odd Visitante Vence'].astype(float)
-        df['Placar Exato'] = df['Placar Exato'].astype(str)
-        df['Odd Placar Exato'] = df['Odd Placar Exato'].astype(float)
-        
-        df['COLUNA'] = df['COLUNA'].astype(int)
+        df['Campeonato'] = le_league.fit_transform(df['Campeonato'])
+        df['Time da casa'] = le_home.fit_transform(df['Time da casa'])
+        df['Time contra'] = le_away.fit_transform(df['Time contra'])
         # Define columns
-        target_columns = ['OUTCOME']
+        pred_cols = ['Id da partida','Gols time casa','Gols time contra','Gols totais',
+                    'Odd Casa Vence','Odd Empate','Odd Visitante Vence','PRED_0','PRED_1',
+                    'PRED_2','PRED_3','PRED_4','PROBABILIDADE','CONFIDENCE_LEVEL',
+                    'RECOMMENDED_STAKE','Id da partida','Campeonato','Data','Tempo',
+                    'Time da casa','Time contra','Gols time casa','Gols time contra',
+                    'Gols totais','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5',
+                    'Odd Under 3.5','Odd Casa Vence','Odd Empate','Odd Visitante Vence',
+                    'Placar Exato','Odd Placar Exato','Data das odds','HORA','COLUNA',
+                    'PROBABILIDADE','OUTCOME']
+        
+    
+        target_columns = ['OUTCOME','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5']
         columns_to_drop = [
             'Data das odds', 'HORA', 'COLUNA', 'Campeonato', 'Data', 'Tempo',
             'Time da casa', 'Time contra', 'Placar Exato', 'Odd Placar Exato',
-            'OUTCOME', 'PROBABILIDADE'  # drop target columns too
+            'OUTCOME', 'PROBABILIDADE','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5'
         ]
-        # Feature selection
-        X = df.drop(columns=columns_to_drop)
-        y = df[target_columns]
+        for_x = ['Time da casa','Time contra','Campeonato','Gols time casa',
+            'Gols time contra','Gols totais','Odd Placar Exato','Data_ano','Data_dia','Data_mes',
+            'Data das odds_ano','Data das odds_dia','Data das odds_mes',
+            'Data das odds_hr','Data das odds_min','Placar Exato_time_1',
+            'Placar Exato_time_2']
 
-        # Drop rows where either X or y has NaNs
+        print(df['Data_ano'])
+        X = df[for_x].copy()
+        y = df[target_columns].copy()
+        print(X.describe())
+        print(y.describe())
+        
+        # Drop rows with missing values
         combined = pd.concat([X, y], axis=1).dropna()
         X = combined[X.columns]
         y = combined[y.columns]
-        print(model_path)
+        
         # Train-test split
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
-        if x_path and x_path and os.path.exists(x_path) and os.path.exists(y_path) and not model_path:
-            x_old = pd.read_csv(x_path)
-            y_old = pd.read_csv(y_path)
-
-            error_mask = ~y.eq(y_old).all(axis=1)
-            x_errors = X[error_mask]
-            y_errors = y[error_mask]
-
-            X_augmented = pd.concat([x_old, x_errors], ignore_index=True)
-            y_augmented = pd.concat([y_old, y_errors], ignore_index=True)
-
-            sample_weight = np.ones(len(y_augmented))
-            sample_weight[-len(y_errors):] = error_weight
-
-            new_model = clone(model)
-            new_model.fit(X_augmented, y_augmented, sample_weight=sample_weight)
-            
-            with open(create_dated_filename(name='model',directory='./app/generated',extension='pkl'), 'wb') as f:
-                pickle.dump(new_model, f)
-            return
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
         # Train the model
-        if x_path and x_path and os.path.exists(x_path) and os.path.exists(y_path) and model_path:
-            x_old = X
-            y_old = y
-
-            error_mask = ~y.eq(y_old).all(axis=1)
-            x_errors = X[error_mask]
-            y_errors = y[error_mask]
-
-            X_augmented = pd.concat([x_old, x_errors], ignore_index=True)
-            y_augmented = pd.concat([y_old, y_errors], ignore_index=True)
-
-            sample_weight = np.ones(len(y_augmented))
-            sample_weight[-len(y_errors):] = error_weight
-
-            new_model = clone(model)
-            new_model.fit(X_augmented, y_augmented, sample_weight=sample_weight)
-            print('mimi')
-            with open(create_dated_filename(name='model',directory='./app/generated',extension='pkl'), 'wb') as f:
-                pickle.dump(new_model, f)
-            return
-        print('awaw')
         model.fit(X_train, y_train)
-        print('uiui')
-        # Save test sets and model
-        X_test.to_csv(create_dated_filename(directory='./app/generated',extension='csv',name='x_in_novo'), index=False)
-        y_test.to_csv(create_dated_filename(directory='./app/generated',extension='csv',name='y_out_novo'), index=False)
-        df.to_csv(create_dated_filename(directory='./app/generated',extension='csv',name='actuals_from_training'), index=False)
-        print('model_path')
-        if model_path and os.path.exists(model_path):
-            with open(model_path, 'wb') as f:
-                pickle.dump(model, f)
-        else:
-            print('model_path2')
-            with open(create_dated_filename(directory='./app/generated',extension='pkl',name='model'), 'wb') as f:
-                pickle.dump(model, f)
+        
+        
         print("Model trained successfully.")
-        
+        # with open(create_dated_filename('model', 'pkl'), "wb") as f:
+        #     pickle.dump((model, X_train.columns.tolist()), f)
+        with open(create_dated_filename('model', 'pkl'), "wb") as f:
+            pickle.dump(model, f)
+        return X_train, y_train, le_home, le_away, le_league, combined
     except Exception as e:
-        print(f"Error during training: {str(e)}")
+        print(f'Erro no treinamento {e}')
+        return None, None
+            
         
 
-
-
-def predict(config, model_path, x_path, y_path, hora, max):
+def predict(config, model_path, x_path, y_path, hora, max,X,y,create,le_home, le_away, le_league, combined):
     """
     Generates predictions from raw match data.
     """
@@ -410,98 +383,157 @@ def predict(config, model_path, x_path, y_path, hora, max):
         conf = config.load_config()
         config.from_dict(conf)
         try:
-            if model_path and os.path.exists(model_path): # 1. Load model
-                with open(model_path, 'rb') as f:
-                    model = pickle.load(f)
-            else:
-               with open(get_most_recent_file_pkl('model','../generated'), 'rb') as f:
+            
+            with open(get_most_recent_file('model','pkl'), 'rb') as f:
                 model = pickle.load(f)
         except:
-            with open(get_most_recent_file_pkl('model','../generated'), 'rb') as f:
-                model = pickle.load(f)
+            raise Exception('Modelo não encontrada.')
         # 2. Load test data
-        X_test = pd.read_csv(get_most_recent_file(name='x_in_novo',directory='../generated'))
-        y_test = pd.read_csv(get_most_recent_file(name='y_out_novo',directory='../generated'))
         
+        # if X is None or y is None:
+        #     X_test = pd.read_csv(get_most_recent_file('x_in_novo','csv'))
+        #     y_test = pd.read_csv(get_most_recent_file('y_out_novo','csv'))
         
-        actuals = pd.read_csv(get_most_recent_file('actuals', '../generated'))
-       
+        actuals_o = pd.read_csv('app/generated/historico_17-05-2025_19-17-00.csv')
+        actuals = actuals_o.copy()
+        # if create:
+        #     actuals = pd.read_csv(get_most_recent_file('actuals', 'csv'))
+        # else:
+        #     actuals = pd.read_csv(get_most_recent_file('pred', 'csv'))
+        pred_df = None
+        actuals['Data'] = pd.to_datetime(actuals['Data'], errors='coerce')
+        actuals['Data das odds'] = pd.to_datetime(actuals['Data das odds'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
 
+        le_placar_1= LabelEncoder()
+        le_placar_2 = LabelEncoder()
+        actuals['Data_ano'] = actuals['Data'].dt.year
+        actuals['Data_dia'] = actuals['Data'].dt.day
+        actuals['Data_mes'] = actuals['Data'].dt.month
+        actuals['Data das odds_ano'] = actuals['Data das odds'].dt.year
+        actuals['Data das odds_dia'] = actuals['Data das odds'].dt.day
+        actuals['Data das odds_mes'] = actuals['Data das odds'].dt.month
+        actuals['Data das odds_hr'] = actuals['Data das odds'].dt.hour
+        actuals['Data das odds_min'] = actuals['Data das odds'].dt.minute
+        
+        actuals[['Placar Exato_time_1', 'Placar Exato_time_2']] = actuals['Placar Exato'].str.split('-', expand=True)
+        
+        actuals['Campeonato'] = X['Campeonato']
+        actuals['Time da casa'] = X['Time da casa']
+        actuals['Time contra'] = X['Time contra']
+        # Define columns
+        pred_cols = ['Id da partida','Gols time casa','Gols time contra','Gols totais',
+                    'Odd Casa Vence','Odd Empate','Odd Visitante Vence','PRED_0','PRED_1',
+                    'PRED_2','PRED_3','PRED_4','PROBABILIDADE','CONFIDENCE_LEVEL',
+                    'RECOMMENDED_STAKE','Id da partida','Campeonato','Data','Tempo',
+                    'Time da casa','Time contra','Gols time casa','Gols time contra',
+                    'Gols totais','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5',
+                    'Odd Under 3.5','Odd Casa Vence','Odd Empate','Odd Visitante Vence',
+                    'Placar Exato','Odd Placar Exato','Data das odds','HORA','COLUNA',
+                    'PROBABILIDADE','OUTCOME']
+        
+    
+        target_columns = ['OUTCOME','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5']
+        columns_to_drop = [
+            'Data das odds', 'HORA', 'COLUNA', 'Campeonato', 'Data', 'Tempo',
+            'Time da casa', 'Time contra', 'Placar Exato', 'Odd Placar Exato',
+            'OUTCOME', 'PROBABILIDADE','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5'
+        ]
+        for_x = ['Time da casa','Time contra','Campeonato','Gols time casa',
+            'Gols time contra','Gols totais','Odd Placar Exato','Data_ano','Data_dia','Data_mes',
+            'Data das odds_ano','Data das odds_dia','Data das odds_mes',
+            'Data das odds_hr','Data das odds_min','Placar Exato_time_1',
+            'Placar Exato_time_2']
+        
+        X = combined[for_x]
+        y = combined[target_columns]
         
         # 3. Make predictions
-        predictions = model.predict(X_test)
-        
-        # Check shape of predictions to understand the structure
-        print("Shape of predictions:", predictions.shape)
-        
-        # 4. Create predictions DataFrame
-        if len(predictions.shape) == 1:  # 1D output
+        predictions = model.predict(X)
+        if len(predictions.shape) == 1:
             pred_df = pd.DataFrame(predictions, columns=['PREDICTION_SCORE'])
-        else:  # Multi-output
-            pred_df = pd.DataFrame(predictions, columns=[f'PREDICTION_SCORE_{i+1}' for i in range(predictions.shape[1])])
+        else:
+            pred_df = pd.DataFrame(predictions, columns=[f'PRED_{i}' for i in range(predictions.shape[1])])
 
-        # 5. Add probabilities
-        probabilidade_list = []
-        for _, row in X_test.iterrows():
-            prob_casa = 1 / row['Odd Casa Vence']
-            prob_empate = 1 / row['Odd Empate']
-            prob_visitante = 1 / row['Odd Visitante Vence']
-            total_prob = prob_casa + prob_empate + prob_visitante
-            weighted_prob = (prob_casa * 1 + prob_empate * 0.5 + prob_visitante * 0) / total_prob
-            probabilidade_list.append(weighted_prob)
-
-        pred_df['PROBABILIDADE'] = probabilidade_list
-
-        # 6. Add confidence and stake
-        pred_df['CONFIDENCE_LEVEL'] = pred_df['PROBABILIDADE'].apply(
-            lambda c: config.calibrar_confianca(c) if pd.notnull(c) else None
-        )
-
-        pred_df['RECOMMENDED_STAKE'] = pred_df['CONFIDENCE_LEVEL'].apply(
-            lambda c: config.calcular_stake(c) if pd.notnull(c) else None
-        )
-
+        
+        
+        # X_test['Time da casa'] = le_home.inverse_transform(X_test['Time da casa'])
+        # X_test['Time contra'] = le_away.inverse_transform(X_test['Time contra'])
+        # X_test['Campeonato'] = le_league.inverse_transform(X_test['Campeonato'])
+        
         # 7. Add model performance score (same for all rows)
-        score = mean_squared_error(y_test, predictions)
-        pred_df['PREDICTION_SCORE'] = score
 
         # 8. Join X_test and predictions side by side
-        X_test = X_test.reset_index(drop=True)
-        pred_df = pred_df.reset_index(drop=True)
-        actuals_df = actuals.reset_index(drop=True)
+        
 
-        # Concatenar todos os DataFrames horizontalmente
-        result_df = pd.concat([X_test, pred_df, actuals_df], axis=1)
-
-        # 9. Ensure types
-        result_df['PREDICTION_SCORE'] = result_df['PREDICTION_SCORE'].astype(float)
-        result_df['PROBABILIDADE'] = result_df['PROBABILIDADE'].astype(float)
-        result_df['CONFIDENCE_LEVEL'] = result_df['CONFIDENCE_LEVEL'].astype(str)
-        result_df['RECOMMENDED_STAKE'] = result_df['RECOMMENDED_STAKE'].astype(float)
-
+       # After generating pred_df and before concatenating
+        df_concat = pd.concat([combined, actuals_o], axis=1)
+        df_concat = pd.concat([df_concat, pred_df], axis=1)
         # 10. Save
-        result_df = result_df.drop(columns=['Data'])
+        # result_df = result_df.drop(columns=['Data'])
 
-        output_path = create_dated_filename(name='pred',directory='./app/generated',extension='csv')
-        result_df.to_csv(output_path, index=False)
+        output_path = create_dated_filename(name='pred',extension='csv')
+        df_concat.to_csv(output_path, index=False)
         print(f"Predictions saved successfully to {output_path}")
-
     
     except Exception as e:
+        if str(e).startswith("Input X contains NaN."):
+            messagebox.showwarning('Problemas na Previsão', 'Provavelmente alguns campos de algumas das tabelas geradas pela api estão nulas.')
+            print(e)
+            return 
+        messagebox.showerror('Problema na Previsão',e)
         print(e)
         
 
+def concatenate_csv_files(file_list):
+    """
+    Given a list of CSV file paths, returns a single concatenated DataFrame.
+    
+    Parameters:
+        file_list (list of str): Paths to CSV files
+    
+    Returns:
+        pd.DataFrame: Concatenated DataFrame
+    """
+    dfs = []
+    for file in file_list:
+        try:
+            df = pd.read_csv(file)
+            dfs.append(df)
+        except Exception as e:
+            print(f"❌ Failed to read '{file}': {e}")
+    
+    if not dfs:
+        print("⚠️ No valid CSVs were read.")
+        return pd.DataFrame()  # Return empty DataFrame
 
+    combined_df = pd.concat(dfs, ignore_index=True)
+    return combined_df
+def get_all_table_csv_from_generated():
+    files = []
+    # Specify the directory path
+    directory = get_generated_path()
+    
+    # List all files in the directory
+    for filename in os.listdir(directory):
+        # Check if the file starts with 'table' and ends with '.csv'
+        if filename.startswith('tabela') and filename.endswith('.csv'):
+            # Get the full path of the file
+            full_path = os.path.join(directory, filename)
+            files.append(full_path)
+    
+    return files        
 def generate_actuals_from_existing_data(input_file, output_file, horas, max):
     """
     Generates actuals file by appending processed columns to the original data.
     Adds: HORA, COLUNA, PROBABILIDADE, OUTCOME
     """
+    df = None
     if input_file:
-        df = pd.read_csv(os.path.join(BASE_DIR,input_file))
+        df = concatenate_csv_files(input_file)
     else:
-        df = pd.read_csv(get_most_recent_file('tabela','../generated'))
-    print(get_most_recent_file('tabela','../generated'))
+        df = concatenate_csv_files(get_all_table_csv_from_generated())
+    print(get_most_recent_file('tabela','csv'))
+    
     hora_list = []
     coluna_list = []
     probabilidade_list = []
@@ -567,8 +599,8 @@ def generate_actuals_from_existing_data(input_file, output_file, horas, max):
     df['Odd Visitante Vence'] = df['Odd Visitante Vence'].astype(float)
     df['Placar Exato'] = df['Placar Exato'].astype(str)
     df['Odd Placar Exato'] = df['Odd Placar Exato'].astype(float)
-    output_file = create_dated_filename(directory='./app/generated',extension='csv',name='actuals')
-    df = filter_by_time(df=df,hora_atual=horas,num_horas=max)
+    output_file = create_dated_filename(extension='csv',name='historico')
+    # df = filter_by_time(df=df,hora_atual=horas,num_horas=max)
     # Save result
     df.to_csv(output_file, index=False)
     print(f"Generated {len(df)} match records with calculated outcomes.")
@@ -628,62 +660,25 @@ if __name__ == '__main__':
     else:
         parser.print_help()
 
-import os
-from datetime import datetime
-import glob
-
-def get_script_relative_path(relative_path):
-    """Convert relative path to be based on this script's location"""
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    return os.path.normpath(os.path.join(script_dir, relative_path))
-
-def get_most_recent_file(name, directory="."):
-    """Find most recent file with pattern name_*.csv"""
-    abs_dir = get_script_relative_path(directory)
-    pattern = os.path.join(abs_dir, f"{name}_*.csv")
-    files = glob.glob(pattern)
-    print(pattern)
-    if not files:
-        raise FileNotFoundError(f"Nenhum arquivo encontrado para o padrão: {pattern}")
-    
-    dated_files = []
-    for f in files:
-        try:
-            # Extract date from filename (pattern: name_DD-MM-YYYY_HH-MM-SS.csv)
-            date_str = os.path.basename(f)[len(name)+1:-4]
-            dt = datetime.strptime(date_str, "%d-%m-%Y_%H-%M-%S")
-            dated_files.append((dt, f))
-        except ValueError:
-            continue
-    
-    if not dated_files:
-        raise FileNotFoundError("No valid dated files found")
-    
-    return max(dated_files, key=lambda x: x[0])[1]
-
-import os
-from datetime import datetime
-import glob
-
 
 def generate_actuals(input_csv, actuals_csv):
  
     generate_actuals_from_existing_data(input_csv, actuals_csv)
 
 def execute( actuals_path, model_path,x_path,y_path,input_csv=None,x_old_path=None,y_old_path=None,train=True,create=True,pred_path=None,history_path=None,config=None,hora=0, max=24):
-    if (x_path == '' or x_path==None) and not actuals_path:
+    if (not x_path) and not actuals_path:
         try:
-            x_path = get_most_recent_file('x_in_novo', '../generated')
+            x_path = get_most_recent_file('x_in_novo', 'csv')
         except Exception as e:
             pass
     if input_csv == '' or input_csv==None:
         try:
-            input_csv = get_most_recent_file('tabela', '../generated')
+            input_csv = get_most_recent_file('tabela', 'csv')
         except Exception as e:
             pass
-    if (y_path =='' or y_path==None) and not actuals_path:
+    if (not y_path) and not actuals_path:
         try:    
-            y_path = get_most_recent_file('y_out_novo', '../generated')
+            y_path = get_most_recent_file('y_out_novo', 'csv')
         except Exception as e:
             pass
     
@@ -695,10 +690,26 @@ def execute( actuals_path, model_path,x_path,y_path,input_csv=None,x_old_path=No
         raise ValueError("config must be either BettingConfig instance or dictionary")
     conf = config.load_config()
     config.from_dict(conf)
-    if create:
+    X,y =None,None
+    # if create:
+    #     if not input_csv:
+    #         execute_api_call()
+    #     generate_actuals_from_existing_data(input_csv, actuals_path,horas=hora,max=max)
+    #     # record_results(pred_path, actuals_path, history_path)
+    # else:
+    #     X,y = train_model(x_path,y_path,model_path,x_old_path,y_old_path,input_csv=input_csv)
+    #     predict(config,model_path,x_path,y_path,hora,max,X,y, create)
+    #     return 
+    # if train:
+    #     X,y = train_model(actuals_path,x_path,y_path,model_path,x_old_path,y_old_path)
+    try:
+        if not input_csv:
+             execute_api_call()
         generate_actuals_from_existing_data(input_csv, actuals_path,horas=hora,max=max)
-        # record_results(pred_path, actuals_path, history_path)
-    if train:
-        train_model(actuals_path,x_path,y_path,model_path,x_old_path,y_old_path)
-    predict(config,model_path,x_path,y_path,hora,max)
+        X,y,le_home, le_away, le_league, combined = train_model(model_path=model_path, x_old_path=None, x_path=None, y_old_path=None, y_path=None, input_csv=None)
+        predict(config,model_path,x_path,y_path,hora,max,X,y,create,le_home, le_away, le_league, combined)
+    except Exception as e:
+        messagebox.showerror('execute_api_call', e)
+    
+    
     

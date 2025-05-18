@@ -1,0 +1,11 @@
+{
+    "conf_alta": 0.59,
+    "conf_media_min": 0.55,
+    "conf_media_max": 0,
+    "conf_baixa_min": 0.5,
+    "conf_baixa_max": 0,
+    "stake_base": 0,
+    "stake_alta_pct": 8.0,
+    "stake_media_pct": 1.0,
+    "stake_baixa_pct": 8.0
+}

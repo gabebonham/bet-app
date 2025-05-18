@@ -8,13 +8,10 @@ from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
 import sys
 import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "app")))
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from view.graphs.visualizer import BetMarketVisualizer
-from services.service import Service
-from view.graphs.graph import Graph
+from app.view.graphs.visualizer import BetMarketVisualizer
+from app.services.service import Service
+from app.view.graphs.graph import Graph
+from datetime import datetime
 class AppView:
     def __init__(self, root):
         self.root = root
@@ -22,9 +19,11 @@ class AppView:
         self.root.geometry("1200x800")
         self.root.minsize(1000, 700)
         self.pred_treeview = ttk.Treeview()
+        self.job = tk.BooleanVar(value=False)
         self.configurar_estilo()
-        
+        self.predictions_tree_frame = None
         self.graph = Graph()
+        self.last_prediction_hour = None
         self.visualizer = BetMarketVisualizer()
         self.service = Service()
         # Variáveis para valores de stake
@@ -75,12 +74,22 @@ class AppView:
         self.model_label = tk.StringVar(value='')
         self.x_table_path = tk.StringVar(value='')
         self.y_table_path = tk.StringVar(value='')
-        self.preencher_interface()
+        self.current_file = tk.StringVar(value='')
+        self.current_table_file = tk.StringVar(value='')
+        self.current_model_file = tk.StringVar(value='')
+        self.target_columns = tk.Variable(value=[])
+        self.support_columns = tk.Variable(value=[])
         
+        self.preencher_interface()
+        self.verify_job()
     def atualizar_datetime(self):
         """Atualiza o label de data e hora"""
         self.datetime_label.config(text=datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
         self.root.after(1000, self.atualizar_datetime)
+    def verify_job(self):
+        if self.job.get():
+            self.run_prediction_job()
+        self.root.after(6000, self.verify_job)
     def carregar_configuracoes(self):
         """Carrega as configurações salvas"""
         try:
@@ -248,56 +257,40 @@ O sistema inclui:
         # Style configuration
         style = ttk.Style()
         style.configure("Custom.TButton", font=("Segoe UI", 10), padding=6)
-        ttk.Checkbutton(frame_config, text='Incluir Geração de nova Entrada', variable=self.create).pack(
-                padx=10, pady=5)
-        ttk.Checkbutton(frame_config, text='Treinar Modelo', variable=self.train).pack(
-                padx=10, pady=5)
+        # ttk.Checkbutton(frame_config, text='Incluir Geração de nova Entrada', variable=self.create).pack(
+        #         padx=10, pady=5)
+        # ttk.Checkbutton(frame_config, text='Treinar Modelo', variable=self.train).pack(
+        #         padx=10, pady=5)
         # File selection button - Tabela Verdadeira
+        ttk.Checkbutton(frame_config, text='Ativar Previsão Automatica', variable=self.job).pack(
+                 padx=10, pady=5)
         btn_tabela = ttk.Button(
             frame_config, 
-            text="Selecionar Tabela Fonte", 
+            text="Selecionar Tabelas Fonte", 
             style="Custom.TButton",
-            command=lambda: self.service.open_file('tabela', self.table_path)
+            command=lambda: self.service.open_file('tables', self.current_table_file)
         )
         btn_tabela.pack(pady=(5, 10), anchor='w', padx=10)
-        table_label = ttk.Label(frame_config, textvariable=self.table_path)
-        table_label.pack(fill=tk.X,padx=10, pady=10)
+        table_label = ttk.Label(frame_config, textvariable=self.current_table_file)
+        # table_label.pack(fill=tk.X,padx=10, pady=10)
         
-        btn_modelo_train = ttk.Button(
-            frame_config, 
-            text="Selecionar Dados para Treino", 
-            style="Custom.TButton",
-            command=lambda:self.service.open_file('x_file',self.x_table_path)
-        )
-        btn_modelo_train.pack(pady=(0, 10), anchor='w', padx=10)
-        x_label = ttk.Label(frame_config, textvariable=self.x_table_path)
-        x_label.pack(fill=tk.X,padx=10, pady=10)
 
-        btn_modelo_y = ttk.Button(
-            frame_config, 
-            text="Selecionar Dados para Compare", 
-            style="Custom.TButton",
-            command=lambda:self.service.open_file('y_file',self.y_table_path)
-        )
-        btn_modelo_y.pack(pady=(0), anchor='w', padx=10)
-        y_label = ttk.Label(frame_config, textvariable=self.y_table_path)
-        y_label.pack(fill=tk.X,padx=10, pady=10)
         # File selection button - Modelo
         btn_modelo = ttk.Button(
             frame_config, 
             text="Selecionar Modelo", 
             style="Custom.TButton",
-            command=lambda: self.service.open_file('modelo',self.model_label)
+            command=lambda: self.service.open_file('modelo',self.current_model_file)
         )
         
-        btn_modelo.pack(pady=(0), anchor='w', padx=10)
-        model_label = ttk.Label(frame_config, textvariable=self.model_label)
-        model_label.pack(fill=tk.X,padx=10, pady=10)
+        # btn_modelo.pack(pady=(0), anchor='w', padx=10)
+        # model_label = ttk.Label(frame_config, textvariable=self.current_model_file)
+        # model_label.pack(fill=tk.X,padx=10, pady=10)
         btn_modelo_create = ttk.Button(
             frame_config, 
             text="Limpar Seleções", 
             style="Custom.TButton",
-            command=lambda:self.service.create_file(self.model_label,self.table_path, self.x_table_path, self.y_table_path)
+            command=lambda:self.service.create_file(self.current_table_file,self.current_model_file, self.x_table_path, self.y_table_path)
         )
         
         btn_modelo_create.pack(pady=(0, 10), anchor='w', padx=10)
@@ -647,6 +640,7 @@ O sistema inclui:
         self.market_frames = {}
         for market_id, market_name in markets:
             frame = ttk.Frame(self.previsoes_notebook)
+            self.predictions_tree_frame = frame
             self.previsoes_notebook.add(frame, text=market_name)
             self.market_frames[market_id] = frame
             self._create_market_tab(frame, market_name)
@@ -661,7 +655,7 @@ O sistema inclui:
         # Treeview with scrollbar
         tree_frame = ttk.Frame(container)
         tree_frame.pack(fill=tk.BOTH, expand=True)
-        
+        self.predictions_tree_frame = tree_frame
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         mercados = [
@@ -695,20 +689,66 @@ O sistema inclui:
         self.root.update()
         # self.pred_treeview = tree_to_view
         action_buttons = [
-            ("Gerar Previsões", lambda m=market_id: self.service.gerar_previsoes(self.hora_atual.get(),self.num_horas.get(),tree_frame,market_id, self.create, self.train))
+            ("", )
         ]
         
-        for btn_text, cmd in action_buttons:
-            ttk.Button(btn_frame, text=btn_text, command=cmd).pack(side=tk.LEFT, padx=2)
+        butn = ttk.Button(btn_frame, text='Gerar Previsões', command=lambda: self.service.gerar_previsoes(
+            self.hora_atual.get(),
+            self.num_horas.get(),
+            tree_frame,
+            market_id,
+            self.create,
+            self.train,
+            self.current_file.get(),
+            self.current_model_file.get()
+            
+        ))
+        butn.pack(side=tk.LEFT, padx=2)
+
+    def delete_flag(self):
+        if os.path.exists('flag.txt'):
+            os.remove('flag.txt')
+            print("File deleted.")
+        else:
+            print("File does not exist.")   
+            
+    def creates_flag(self):
+        with open("flag.txt", "w") as f:
+            pass  # creates an empty file   
+        
+    def run_prediction_job(self):
+        hours = [0, 6, 12, 18, 20]
+        now = datetime.now()
+        current_hour = now.hour
+
+        if current_hour in hours:
+            if self.last_prediction_hour != current_hour:
+                print(f"Running prediction at {current_hour}")
+                self.service.gerar_previsoes(
+                    self.hora_atual.get(),
+                    self.num_horas.get(),
+                    self.predictions_tree_frame,
+                    'MERCADOS',
+                    self.create,
+                    self.train,
+                    self.current_file.get(),
+                    self.current_model_file.get()
+                )
+                self.last_prediction_hour = current_hour
+            else:
+                print("Already ran for this hour.")
+        else:
+            self.last_prediction_hour = None  # Allow run in next valid hour
+            
 
 
 
 
-
-def main():
+def app_main():
     root = tk.Tk()
     app = AppView(root)
     root.mainloop()
+    
 
 if __name__ == "__main__":
-    main()
+    app_main()
