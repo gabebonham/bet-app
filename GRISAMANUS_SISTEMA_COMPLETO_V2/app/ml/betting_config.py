@@ -109,8 +109,9 @@ class BettingConfig:
         
     def save_config(self,config, path):
         """Save configuration to JSON file"""
-        with open(os.path.join(self.get_generated_path(),'grisamanus_config.json')) as f:
-            json.dump(config.to_dict(), f, indent=2)
+        with open(os.path.join(self.get_generated_path(),'grisamanus_config.json'), 'w') as f:
+            # self.from_dict(config)
+            json.dump(config, f, indent=2)
         self.load_config()
 
     def load_config(self):

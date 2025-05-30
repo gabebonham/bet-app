@@ -3,6 +3,7 @@ import seaborn as sns
 from datetime import datetime
 import os
 import sys
+import numpy as np
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
@@ -12,13 +13,15 @@ from pathlib import Path
 import glob
 from app.ml.implementacao_drisamanus_corrigida import execute
 from app.ml.betting_config import BettingConfig
-
+from app.ml.prediction_processing import process_prediction
+from app.bet.main import execute_api_call
+from app.view.graphs.plotting_graphs import run_plotting
 class Service:
     def __init__(self):
-        self.df_btts = pd.DataFrame()  # BTTS market data
-        self.df_prev = pd.DataFrame()  # Over 2.5 goals
-        self.df_table = pd.DataFrame()  # Over 3.5 goals
-        self.df_pred = pd.DataFrame()
+        self.df_euro = pd.DataFrame()  # BTTS market data
+        self.df_supreme= pd.DataFrame()  # Over 2.5 goals
+        self.df_premier = pd.DataFrame()  # Over 3.5 goals
+        self.df_copa = pd.DataFrame()
         self.betconfig = BettingConfig()
         self.current_file = ''
         self.current_model_file = ''
@@ -67,7 +70,12 @@ class Service:
         script_dir = os.path.dirname(os.path.abspath(__file__))
         return os.path.normpath(os.path.join(self.get_generated_path(), relative_path))
 
-   
+    def run_plotting_service(self):
+        lista = [pd.read_csv(self.get_most_recent_file('Euro', 'csv')),
+        pd.read_csv(self.get_most_recent_file('Copa', 'csv')),
+        pd.read_csv(self.get_most_recent_file('Super', 'csv')),
+        pd.read_csv(self.get_most_recent_file('Premier', 'csv'))]
+        run_plotting(lista)
 
     def get_most_recent_file(self,base_name, extension):
         """
@@ -126,48 +134,49 @@ class Service:
         directory = os.path.join('..',directory)
         full_path = os.path.join(self.get_generated_path(), filename)
         return full_path
-    def gerar_previsoes(self, hora_atual, num_horas, tree_frame, mercado, create, train, table, model):
+    def gerar_previsoes(self, hora_atual, num_horas, market_frames, create, train, table, model):
         """
         Gera previsões para os mercados selecionados e popula os treeviews correspondentes.
         """
-        
+        execute_api_call(6)
         
         if (self.x_path and not self.y_path) or (not self.x_path and self.y_path):
             messagebox.showerror('Erro','Se dados de treino ou de compare forem selecionados, o outro tambem deve ser selecionado.')
             return
-        for widget in tree_frame.winfo_children():
-            widget.destroy()
+        
         try:
             self.rodar_previsao(table, model,create, train,horas=hora_atual, max=num_horas)
         except Exception as e:
             messagebox.showerror('Erro',e)
         
         self.load_data(True)
-        df = self.df_prev
-        df_filtrado = df
-        scroll_y = tk.Scrollbar(tree_frame, orient="vertical")
-        scroll_x = tk.Scrollbar(tree_frame, orient="horizontal")
         
-        tree = ttk.Treeview(tree_frame, yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
-        scroll_y.config(command=tree.yview)
-        scroll_x.config(command=tree.xview)
-        if mercado == "BTTS":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
-        elif mercado == "OVER 2.5":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
-        elif mercado == "OVER 3.5":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
-        elif mercado == "UNDER 1.5":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
-        elif mercado == "UNDER 2.5":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
-        elif mercado == "UNDER 3.5":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
-        elif mercado == "MERCADOS":
-            self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+        for mercado, tree_frame in market_frames.items():
+            for widget in tree_frame.winfo_children():
+                widget.destroy()
+            scroll_y = tk.Scrollbar(tree_frame, orient="vertical")
+            scroll_x = tk.Scrollbar(tree_frame, orient="horizontal")
+            
+            tree = ttk.Treeview(tree_frame, yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
+            scroll_y.config(command=tree.yview)
+            scroll_x.config(command=tree.xview)
+            if mercado == "EURO":
+                self.populate_treeview(tree, self.df_euro,scroll_y,scroll_x)
+            if mercado == "COPA":
+                self.populate_treeview(tree, self.df_copa,scroll_y,scroll_x)
+            if mercado == "SUPER":
+                self.populate_treeview(tree, self.df_supreme,scroll_y,scroll_x)
+            if mercado == "PREMIER":
+                self.populate_treeview(tree, self.df_premier,scroll_y,scroll_x)
+            # elif mercado == "UNDER 1.5":
+            #     df_filtrado = self.filter_over25(df=df_filtrado)
+            #     self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
+            
+            
+            
+            tree_frame.grid_rowconfigure(0, weight=1)
+            tree_frame.grid_columnconfigure(0, weight=1)
         
-        tree_frame.grid_rowconfigure(0, weight=1)
-        tree_frame.grid_columnconfigure(0, weight=1)
         
 
     def filter_by_time(self, df, hora_atual, num_horas):
@@ -230,70 +239,145 @@ class Service:
     # Specific filter functions
     def filter_over25(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
-        df_filtered = df[(df['MERCADO'] == 'OVER 2.5')]  # Simplified example
-        # Add any other filters like HORA range
+        df_filtered = df[['OUTCOME','Campeonato','HORA','PROBABILIDADE_DO_OUTCOME','Odd Over 2.5', 'COLUNA']] # Simplified example
+        df_filtered['ODD_PROB_NÍVEL'] = pd.cut(
+            df['Odd Over 2.5_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['TEMPO_PROB_NÍVEL'] = pd.cut(
+            df['Tempo_hr_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['OUTCOME_PROB_NÍVEL'] = pd.cut(
+            df['OUTCOME_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        # df_filtered['PROB_NÍVEL'] = pd.qcut(
+        #     df_filtered['Odd Over 2.5_Acurácia do Erro Médio'],
+        #     q=4,  # 4 categorias baseadas em quartis
+        #     labels=['Muito Baixo', 'Baixo', 'Médio', 'Alto']
+        # )
         return df_filtered
 
     def filter_over35(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
-        df_filtered = df[(df['MERCADO'] == 'OVER 3.5')]  # Simplified example
-        # Add any other filters like HORA range
+        df_filtered = df[['OUTCOME','Campeonato','HORA','PROBABILIDADE_DO_OUTCOME','Odd Over 3.5','COLUNA']] # Simplified example
+        df_filtered['ODD_PROB_NÍVEL'] = pd.cut(
+            df['Odd Over 3.5_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['TEMPO_PROB_NÍVEL'] = pd.cut(
+            df['Tempo_hr_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['OUTCOME_PROB_NÍVEL'] = pd.cut(
+            df['OUTCOME_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
         return df_filtered
 
     def filter_under25(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
-        df_filtered = df[(df['MERCADO'] == 'UNDER 2.5')]  # Simplified example
-        # Add any other filters like HORA range
+        df_filtered = df[['OUTCOME','Campeonato','HORA','PROBABILIDADE_DO_OUTCOME','Odd Under 2.5','COLUNA']] # Simplified example
+        df_filtered['ODD_PROB_NÍVEL'] = pd.cut(
+            df['Odd Under 2.5_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['TEMPO_PROB_NÍVEL'] = pd.cut(
+            df['Tempo_hr_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['OUTCOME_PROB_NÍVEL'] = pd.cut(
+            df['OUTCOME_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
         return df_filtered
 
     def filter_under35(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
-        df_filtered = df[(df['MERCADO'] == 'UNDER 3.5')]  # Simplified example
-        # Add any other filters like HORA range
+        df_filtered = df[['OUTCOME','Campeonato','HORA','PROBABILIDADE_DO_OUTCOME','Odd Under 3.5','COLUNA']]  # Simplified example
+        df_filtered['ODD_PROB_NÍVEL'] = pd.cut(
+            df['Odd Under 3.5_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['TEMPO_PROB_NÍVEL'] = pd.cut(
+            df['Tempo_hr_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['OUTCOME_PROB_NÍVEL'] = pd.cut(
+            df['OUTCOME_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
         return df_filtered
 
     def filter_under15(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
         df_filtered = df[(df['MERCADO'] == 'UNDER 1.5')]  # Simplified example
         # Add any other filters like HORA range
+        df_filtered['PROB_NÍVEL'] = pd.cut(
+            df_filtered['Odd Over 2.5_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
         return df_filtered
 
     def filter_btts(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
-        df_filtered = df[(df['MERCADO'] == 'BTTS')]  # Simplified example
-        # Add any other filters like HORA range
+        df_filtered = df[['OUTCOME','Campeonato','HORA','PROBABILIDADE_DO_OUTCOME','Odd BTTS', 'COLUNA']]  # Simplified example
+        df_filtered['ODD_PROB_NÍVEL'] = pd.cut(
+            df['Odd BTTS_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['TEMPO_PROB_NÍVEL'] = pd.cut(
+            df['Tempo_hr_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        df_filtered['OUTCOME_PROB_NÍVEL'] = pd.cut(
+            df['OUTCOME_Acurácia do Erro Médio'],
+            bins=[0, 0.3, 0.5, 0.7, np.inf],
+            labels=['Muito Baixo', 'Baixo', 'Medio', 'Alta'],
+            right=False
+        )
+        # [f"Odd BTTS_Acurácia do Erro Médio"] 
+        # [f"Odd BTTS_Acurácia Exagerada"] 
+        # [f"Odd BTTS_Acurácia Exagerada Ajustada"]
+        # [f"Odd BTTS_Acurácia Pura"] 
         return df_filtered
     
     def load_data(self,flag=False):
-        if flag:
-            if self.current_table_file:
-                self.df_prev = pd.read_csv(self.current_table_file)
-            else:
-                self.df_prev = pd.read_csv(self.get_most_recent_file('pred','csv'))
-            return
-        if self.current_table_file:
-            df = pd.read_csv(self.current_table_file)
-        else:
-            df = pd.read_csv(self.get_most_recent_file('pred','csv'))
-        
-        df['OCORRENCIA'] = (df['Gols time casa'] > 0) & (df['Gols time contra'] > 0)
-          
-        self.df_btts = df.copy()
-        self.df_prev = df.copy()
-    
-        self.df_table = df.copy()
-        self.df_pred = df.copy()
-        # Convert columns if needed
-        
-        self.df_btts['CICLO'] = pd.to_datetime(self.df_pred['Tempo'], format='%H:%M').dt.minute.apply(
-            lambda x: '1st Half' if x <= 45 else '2nd Half')
-        self.df_pred['CICLO'] = pd.to_datetime(self.df_pred['Tempo'], format='%H:%M').dt.minute.apply(
-            lambda x: '1st Half' if x <= 45 else '2nd Half')
-        self.df_table['CICLO'] = pd.to_datetime(self.df_pred['Tempo'], format='%H:%M').dt.minute.apply(
-            lambda x: '1st Half' if x <= 45 else '2nd Half')
-        self.df_btts['HORA'] = pd.to_datetime(self.df_btts['Tempo'], format='%H:%M').dt.hour
-        self.df_pred['HORA'] = pd.to_datetime(self.df_pred['Tempo'], format='%H:%M').dt.hour
-        self.df_table['HORA'] = pd.to_datetime(self.df_table['Tempo'], format='%H:%M').dt.hour
+        self.df_euro = pd.read_csv(self.get_most_recent_file('Euro', 'csv'))
+        self.df_copa = pd.read_csv(self.get_most_recent_file('Copa', 'csv'))
+        self.df_premier = pd.read_csv(self.get_most_recent_file('Premier', 'csv'))
+        self.df_supreme = pd.read_csv(self.get_most_recent_file('Super', 'csv'))
         
         
     def carregar_previsoes(self):
@@ -373,11 +457,11 @@ class Service:
     def rodar_previsao(self,table, model, create, train, horas, max):
         """Executa a previsão com base no modelo treinado"""
         try:
-            execute(max=max,hora=horas, config=self.get_current_config(),input_csv=self.current_files,actuals_path=self.create_dated_filename(name='actuals',extension='csv'),pred_path=self.create_dated_filename(name='pred',extension='csv'), model_path=self.current_model_file,x_path=self.x_path,y_path=self.y_path,train=train,create=create)
-                
+            process_prediction(horas, max)  
             
             messagebox.showinfo("Sucesso", 'Previsões criadas.')
         except Exception as e:
+            print(e)
             messagebox.showerror('rodar_previsao', e)
         # messagebox.showinfo("Sucesso", f'crated at {create_dated_filename(name='actuals',extension='csv')} horas {horas} max {max}')
 
@@ -396,20 +480,19 @@ class Service:
         }
     
     def processar_previsoes(self):
-        execute(self.get_current_config(),input_csv=self.current_table_file,actuals_path=self.current_table_file,pred_path=f'../generated/pred_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',history_path=f'../generated/historico_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv', model_path=self.current_model_file,x_path=f'../generated/x_in_novo_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',y_path=f'../generated/y_out_novo_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv',x_old_path=self.old_x_path+'.csv',y_old_path=self.old_y_path+'.csv',train=self.train.get(),create=self.create.get())
-            
+        # process_prediction()
         messagebox.showinfo(title='Sucesso',message='Previsões geradas com sucesso.')
     
 
     def _refresh_all_predictions(self, hora_atual, num_horas,treeview):
         """Refresh predictions for all markets"""
         
-        for market_id in ['btts', 'over25', 'over35', 'under15', 'under25', 'under35']:
-            try:
-                self.gerar_previsoes(hora_atual, num_horas, market_id,treeview)
-            except Exception as e:
-                print(f"Erro ao atualizar {market_id}: {str(e)}")
-        messagebox.showinfo("Sucesso", "Previsões geradas com sucesso!")
+        # for market_id in ['btts', 'over25', 'over35', 'under15', 'under25', 'under35']:
+        #     try:
+        #         self.gerar_previsoes(hora_atual, num_horas, market_id,treeview)
+        #     except Exception as e:
+        #         print(f"Erro ao atualizar {market_id}: {str(e)}")
+        # messagebox.showinfo("Sucesso", "Previsões geradas com sucesso!")
         
         
     def clear_treeview(self, tree):
@@ -498,7 +581,7 @@ class Service:
     def carregar_dados_partidas(self, treeview_tabela):
         """Carrega os dados das partidas na tabela"""
         try:
-            from ml.implementacao_drisamanus_corrigida import generate_actuals
+            from app.ml.implementacao_drisamanus_corrigida import generate_actuals
             file_path = filedialog.askopenfilename(title="Selecione um Arquivo", filetypes=[("Todos os Arquivos", "*.*")])
             # Limpar tabela existente
             for item in treeview_tabela.get_children():
@@ -805,8 +888,7 @@ class Service:
             
             # Salvar em arquivo JSON
             import json
-            with open("../generated/grisamanus_config.json", "w") as f:
-                json.dump(config, f, indent=4)
+            self.betconfig.save_config(config=config, path='.')
             
             messagebox.showinfo("Sucesso", "Configurações salvas com sucesso!")
         except Exception as e:

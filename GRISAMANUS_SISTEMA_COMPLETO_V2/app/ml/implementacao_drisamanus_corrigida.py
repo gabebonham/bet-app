@@ -5,7 +5,7 @@ from sklearn.model_selection import TimeSeriesSplit, GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.multioutput import MultiOutputRegressor
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingRegressor
-from sklearn.metrics import classification_report, roc_auc_score, mean_squared_error
+from sklearn.metrics import classification_report, roc_auc_score, mean_squared_error,mean_absolute_error, r2_score
 import joblib
 from sklearn.base import clone
 import sys
@@ -295,6 +295,7 @@ def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_pa
         model = MultiOutputRegressor(GradientBoostingRegressor())
         df = pd.read_csv(get_most_recent_file('historico','csv'))
         df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+        df['Tempo'] = pd.to_datetime(df['Tempo'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
         df['Data das odds'] = pd.to_datetime(df['Data das odds'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
 
         le_home = LabelEncoder()
@@ -310,9 +311,9 @@ def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_pa
         df['Data das odds_mes'] = df['Data das odds'].dt.month
         df['Data das odds_hr'] = df['Data das odds'].dt.hour
         df['Data das odds_min'] = df['Data das odds'].dt.minute
-        
+       
         df[['Placar Exato_time_1', 'Placar Exato_time_2']] = df['Placar Exato'].str.split('-', expand=True)
-        
+        df['Tempo_hr'] = df['Tempo'].dt.hour
         df['Campeonato'] = le_league.fit_transform(df['Campeonato'])
         df['Time da casa'] = le_home.fit_transform(df['Time da casa'])
         df['Time contra'] = le_away.fit_transform(df['Time contra'])
@@ -326,9 +327,10 @@ def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_pa
                     'Odd Under 3.5','Odd Casa Vence','Odd Empate','Odd Visitante Vence',
                     'Placar Exato','Odd Placar Exato','Data das odds','HORA','COLUNA',
                     'PROBABILIDADE','OUTCOME']
-        
-    
-        target_columns = ['OUTCOME','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5']
+
+
+        target_columns = ['OUTCOME','Odd BTTS','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5',
+            'Tempo_hr', 'PROBABILIDADE']
         columns_to_drop = [
             'Data das odds', 'HORA', 'COLUNA', 'Campeonato', 'Data', 'Tempo',
             'Time da casa', 'Time contra', 'Placar Exato', 'Odd Placar Exato',
@@ -336,8 +338,7 @@ def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_pa
         ]
         for_x = ['Time da casa','Time contra','Campeonato','Gols time casa',
             'Gols time contra','Gols totais','Odd Placar Exato','Data_ano','Data_dia','Data_mes',
-            'Data das odds_ano','Data das odds_dia','Data das odds_mes',
-            'Data das odds_hr','Data das odds_min','Placar Exato_time_1',
+            'Data das odds_ano','Data das odds_dia','Data das odds_mes','Data das odds_hr','Data das odds_min','Placar Exato_time_1',
             'Placar Exato_time_2']
 
         print(df['Data_ano'])
@@ -350,7 +351,10 @@ def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_pa
         combined = pd.concat([X, y], axis=1).dropna()
         X = combined[X.columns]
         y = combined[y.columns]
-        
+        print(f"X shape before split: {X.shape}")
+        print(f"y shape before split: {y.shape}")
+        print("Missing values in X:", X.isna().sum().sum())
+        print("Missing values in y:", y.isna().sum().sum())
         # Train-test split
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
@@ -394,8 +398,9 @@ def predict(config, model_path, x_path, y_path, hora, max,X,y,create,le_home, le
         #     X_test = pd.read_csv(get_most_recent_file('x_in_novo','csv'))
         #     y_test = pd.read_csv(get_most_recent_file('y_out_novo','csv'))
         
-        actuals_o = pd.read_csv('app/generated/historico_17-05-2025_19-17-00.csv')
+        actuals_o = pd.read_csv(get_most_recent_file('historico', 'csv'))
         actuals = actuals_o.copy()
+        
         # if create:
         #     actuals = pd.read_csv(get_most_recent_file('actuals', 'csv'))
         # else:
@@ -432,7 +437,7 @@ def predict(config, model_path, x_path, y_path, hora, max,X,y,create,le_home, le
                     'PROBABILIDADE','OUTCOME']
         
     
-        target_columns = ['OUTCOME','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5']
+        target_columns = ['OUTCOME','Odd BTTS','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5','Tempo_hr', 'PROBABILIDADE']
         columns_to_drop = [
             'Data das odds', 'HORA', 'COLUNA', 'Campeonato', 'Data', 'Tempo',
             'Time da casa', 'Time contra', 'Placar Exato', 'Odd Placar Exato',
@@ -452,25 +457,62 @@ def predict(config, model_path, x_path, y_path, hora, max,X,y,create,le_home, le
         if len(predictions.shape) == 1:
             pred_df = pd.DataFrame(predictions, columns=['PREDICTION_SCORE'])
         else:
-            pred_df = pd.DataFrame(predictions, columns=[f'PRED_{i}' for i in range(predictions.shape[1])])
+            pred_df = pd.DataFrame(predictions, columns=target_columns)
 
         
         
-        # X_test['Time da casa'] = le_home.inverse_transform(X_test['Time da casa'])
-        # X_test['Time contra'] = le_away.inverse_transform(X_test['Time contra'])
-        # X_test['Campeonato'] = le_league.inverse_transform(X_test['Campeonato'])
+        combined['Time da casa'] = le_home.inverse_transform(combined['Time da casa'])
+        combined['Time contra'] = le_away.inverse_transform(combined['Time contra'])
+        combined['Campeonato'] = le_league.inverse_transform(combined['Campeonato'])
         
         # 7. Add model performance score (same for all rows)
 
         # 8. Join X_test and predictions side by side
-        
-
-       # After generating pred_df and before concatenating
+        print(f"\nDebug before concatenation:")
+        print(f"combined length: {len(combined)}")
+        print(f"actuals_o length: {len(actuals_o)}")
+        print(f"pred_df length: {len(pred_df)}")
+        actuals_o.drop(columns=['PROBABILIDADE'])
+        # After generating pred_df and before concatenating
         df_concat = pd.concat([combined, actuals_o], axis=1)
         df_concat = pd.concat([df_concat, pred_df], axis=1)
+        regression_metrics = {}
+        for col in target_columns:
+            if col in y.columns and col in pred_df.columns:
+                y_true = y[col]
+                y_pred = pred_df[col]
+                
+                # Calculate common regression metrics
+                regression_metrics[f"{col}_Acurácia do Erro Médio"] = mean_absolute_error(y_true, y_pred)
+                regression_metrics[f"{col}_Acurácia Exagerada"] = mean_squared_error(y_true, y_pred)
+                regression_metrics[f"{col}_Acurácia Exagerada Ajustada"] = np.sqrt(mean_squared_error(y_true, y_pred))
+                regression_metrics[f"{col}_Acurácia Pura"] = r2_score(y_true, y_pred)
+
+        # Add regression metrics to your final dataframe
+        for metric_name, metric_value in regression_metrics.items():
+            df_concat[metric_name] = metric_value
+        # common_indices = combined.index.intersection(actuals_o.index)
+        # combined = combined.loc[common_indices]
+        # actuals_o = actuals_o.loc[common_indices]
+        
+        # Now concatenate
+        # df_concat = pd.concat([
+        #     combined.reset_index(drop=True),
+        #     actuals_o.reset_index(drop=True),
+        #     pred_df.reset_index(drop=True)
+        # ], axis=1)
         # 10. Save
         # result_df = result_df.drop(columns=['Data'])
-
+        df_concat['HORA'] = pred_df['Tempo_hr']
+        df_concat['Odd Under 2.5'] = pred_df['Odd Under 2.5']
+        df_concat['Odd Over 2.5'] = pred_df['Odd Over 2.5']
+        df_concat['Odd Under 3.5'] = pred_df['Odd Under 3.5']
+        df_concat['Odd Over 3.5'] = pred_df['Odd Over 3.5']
+        df_concat['Odd BTTS'] = pred_df['Odd BTTS']
+        df_concat['OUTCOME'] = pred_df['OUTCOME']
+        df_concat['PROBABILIDADE_DO_OUTCOME'] = pred_df['PROBABILIDADE']
+        df_concat = filter_by_time(df=df_concat,hora_atual=hora, num_horas=max )
+        
         output_path = create_dated_filename(name='pred',extension='csv')
         df_concat.to_csv(output_path, index=False)
         print(f"Predictions saved successfully to {output_path}")
@@ -482,7 +524,7 @@ def predict(config, model_path, x_path, y_path, hora, max,X,y,create,le_home, le
             return 
         messagebox.showerror('Problema na Previsão',e)
         print(e)
-        
+
 
 def concatenate_csv_files(file_list):
     """
@@ -533,7 +575,10 @@ def generate_actuals_from_existing_data(input_file, output_file, horas, max):
     else:
         df = concatenate_csv_files(get_all_table_csv_from_generated())
     print(get_most_recent_file('tabela','csv'))
-    
+    df = df.dropna(subset=[
+        'Gols time casa', 'Gols time contra',
+        'Odd Casa Vence', 'Odd Empate', 'Odd Visitante Vence'
+    ])
     hora_list = []
     coluna_list = []
     probabilidade_list = []
@@ -577,7 +622,7 @@ def generate_actuals_from_existing_data(input_file, output_file, horas, max):
         # campeonato.append()
     # Add new columns to original DataFrame
     df['Tempo'] = pd.to_datetime(df['Tempo'], format='%H:%M', errors='coerce')
-
+    df['Odd BTTS'] = ((df['Gols time casa'] >= 1) & (df['Gols time contra'] >= 1)).astype(int)
     df['HORA'] = df['Tempo'].dt.hour
     df['COLUNA'] = df['Tempo'].dt.minute
     df['PROBABILIDADE'] = probabilidade_list
@@ -602,6 +647,7 @@ def generate_actuals_from_existing_data(input_file, output_file, horas, max):
     output_file = create_dated_filename(extension='csv',name='historico')
     # df = filter_by_time(df=df,hora_atual=horas,num_horas=max)
     # Save result
+    df = df.drop_duplicates()
     df.to_csv(output_file, index=False)
     print(f"Generated {len(df)} match records with calculated outcomes.")
 
@@ -665,7 +711,7 @@ def generate_actuals(input_csv, actuals_csv):
  
     generate_actuals_from_existing_data(input_csv, actuals_csv)
 
-def execute( actuals_path, model_path,x_path,y_path,input_csv=None,x_old_path=None,y_old_path=None,train=True,create=True,pred_path=None,history_path=None,config=None,hora=0, max=24):
+def execute(actuals_path, model_path,x_path,y_path,hora, max,input_csv=None,x_old_path=None,y_old_path=None,train=True,create=True,pred_path=None,history_path=None,config=None):
     if (not x_path) and not actuals_path:
         try:
             x_path = get_most_recent_file('x_in_novo', 'csv')
@@ -704,7 +750,9 @@ def execute( actuals_path, model_path,x_path,y_path,input_csv=None,x_old_path=No
     #     X,y = train_model(actuals_path,x_path,y_path,model_path,x_old_path,y_old_path)
     try:
         if not input_csv:
-             execute_api_call()
+            hora_min = hora
+            hora_max = hora_min+max
+            execute_api_call(6)
         generate_actuals_from_existing_data(input_csv, actuals_path,horas=hora,max=max)
         X,y,le_home, le_away, le_league, combined = train_model(model_path=model_path, x_old_path=None, x_path=None, y_old_path=None, y_path=None, input_csv=None)
         predict(config,model_path,x_path,y_path,hora,max,X,y,create,le_home, le_away, le_league, combined)

@@ -141,76 +141,89 @@ def predict(config,X,y,create,combined):
         
         print(e)
         
-try:
-    model = MultiOutputRegressor(GradientBoostingRegressor())
-    df = pd.read_csv("app/generated/historico_17-05-2025_19-17-00.csv")
-    df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
-    df['Data das odds'] = pd.to_datetime(df['Data das odds'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+def train_model(input_csv, x_path, y_path, model_path, x_old_path=None, y_old_path=None, error_weight=0.2):
+    """
+    Trains a DecisionTree model with multi-output support and proper preprocessing.
+    
+    Returns:
+        tuple: (X_test, y_test) DataFrames if successful, None if failed
+    """
+    try:
+        model = MultiOutputRegressor(GradientBoostingRegressor())
+        df = pd.read_csv(get_most_recent_file('historico','csv'))
+        df['Data'] = pd.to_datetime(df['Data'], errors='coerce')
+        df['Tempo'] = pd.to_datetime(df['Tempo'], format='%H:%M', errors='coerce')
+        df['Data das odds'] = pd.to_datetime(df['Data das odds'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
 
-    le_home = LabelEncoder()
-    le_away = LabelEncoder()
-    le_league = LabelEncoder()
-    le_placar_1= LabelEncoder()
-    le_placar_2 = LabelEncoder()
-    df['Data_ano'] = df['Data'].dt.year
-    df['Data_dia'] = df['Data'].dt.day
-    df['Data_mes'] = df['Data'].dt.month
-    df['Data das odds_ano'] = df['Data das odds'].dt.year
-    df['Data das odds_dia'] = df['Data das odds'].dt.day
-    df['Data das odds_mes'] = df['Data das odds'].dt.month
-    df['Data das odds_hr'] = df['Data das odds'].dt.hour
-    df['Data das odds_min'] = df['Data das odds'].dt.minute
-    
-    df[['Placar Exato_time_1', 'Placar Exato_time_2']] = df['Placar Exato'].str.split('-', expand=True)
-    
-    df['Campeonato'] = le_league.fit_transform(df['Campeonato'])
-    df['Time da casa'] = le_home.fit_transform(df['Time da casa'])
-    df['Time contra'] = le_away.fit_transform(df['Time contra'])
-    # Define columns
-    pred_cols = ['Id da partida','Gols time casa','Gols time contra','Gols totais',
-                'Odd Casa Vence','Odd Empate','Odd Visitante Vence','PRED_0','PRED_1',
-                'PRED_2','PRED_3','PRED_4','PROBABILIDADE','CONFIDENCE_LEVEL',
-                'RECOMMENDED_STAKE','Id da partida','Campeonato','Data','Tempo',
-                'Time da casa','Time contra','Gols time casa','Gols time contra',
-                'Gols totais','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5',
-                'Odd Under 3.5','Odd Casa Vence','Odd Empate','Odd Visitante Vence',
-                'Placar Exato','Odd Placar Exato','Data das odds','HORA','COLUNA',
-                'PROBABILIDADE','OUTCOME']
-    
-   
-    target_columns = ['OUTCOME','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5']
-    columns_to_drop = [
-        'Data das odds', 'HORA', 'COLUNA', 'Campeonato', 'Data', 'Tempo',
-        'Time da casa', 'Time contra', 'Placar Exato', 'Odd Placar Exato',
-        'OUTCOME', 'PROBABILIDADE','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5'
-    ]
-    for_x = ['Time da casa','Time contra','Campeonato','Gols time casa',
-   'Gols time contra','Gols totais','Odd Placar Exato','Data_ano','Data_dia','Data_mes',
-    'Data das odds_ano','Data das odds_dia','Data das odds_mes',
-    'Data das odds_hr','Data das odds_min','Placar Exato_time_1',
-    'Placar Exato_time_2']
-
-    print(df['Data_ano'])
-    X = df[for_x].copy()
-    y = df[target_columns].copy()
-    print(X.describe())
-    print(y.describe())
-    
-    # Drop rows with missing values
-    combined = pd.concat([X, y], axis=1).dropna()
-    X = combined[X.columns]
-    y = combined[y.columns]
-    
-    # Train-test split
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    
-    # Train the model
-    model.fit(X_train, y_train)
-    
-    
-    print("Model trained successfully.")
-    predict(config=BettingConfig(), combined=combined, create=True,X=X_train,y=y_train)
-except Exception as e:
-    print(e)
+        le_home = LabelEncoder()
+        le_away = LabelEncoder()
+        le_league = LabelEncoder()
+        le_placar_1= LabelEncoder()
+        le_placar_2 = LabelEncoder()
+        df['Data_ano'] = df['Data'].dt.year
+        df['Data_dia'] = df['Data'].dt.day
+        df['Data_mes'] = df['Data'].dt.month
+        df['Data das odds_ano'] = df['Data das odds'].dt.year
+        df['Data das odds_dia'] = df['Data das odds'].dt.day
+        df['Data das odds_mes'] = df['Data das odds'].dt.month
+        df['Data das odds_hr'] = df['Data das odds'].dt.hour
+        df['Data das odds_min'] = df['Data das odds'].dt.minute
+       
+        df[['Placar Exato_time_1', 'Placar Exato_time_2']] = df['Placar Exato'].str.split('-', expand=True)
+        df['Tempo_hour'] = df['Tempo'].apply(lambda x: x.hour + x.minute/60)
+        df['Campeonato'] = le_league.fit_transform(df['Campeonato'])
+        df['Time da casa'] = le_home.fit_transform(df['Time da casa'])
+        df['Time contra'] = le_away.fit_transform(df['Time contra'])
+        # Define columns
+        pred_cols = ['Id da partida','Gols time casa','Gols time contra','Gols totais',
+                    'Odd Casa Vence','Odd Empate','Odd Visitante Vence','PRED_0','PRED_1',
+                    'PRED_2','PRED_3','PRED_4','PROBABILIDADE','CONFIDENCE_LEVEL',
+                    'RECOMMENDED_STAKE','Id da partida','Campeonato','Data','Tempo',
+                    'Time da casa','Time contra','Gols time casa','Gols time contra',
+                    'Gols totais','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5',
+                    'Odd Under 3.5','Odd Casa Vence','Odd Empate','Odd Visitante Vence',
+                    'Placar Exato','Odd Placar Exato','Data das odds','HORA','COLUNA',
+                    'PROBABILIDADE','OUTCOME']
         
     
+        target_columns = ['OUTCOME','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5',
+            'Tempo_hour']
+        columns_to_drop = [
+            'Data das odds', 'HORA', 'COLUNA', 'Campeonato', 'Data', 'Tempo',
+            'Time da casa', 'Time contra', 'Placar Exato', 'Odd Placar Exato',
+            'OUTCOME', 'PROBABILIDADE','Odd Over 2.5','Odd Under 2.5','Odd Over 3.5','Odd Under 3.5'
+        ]
+        for_x = ['Time da casa','Time contra','Campeonato','Gols time casa',
+            'Gols time contra','Gols totais','Odd Placar Exato','Data_ano','Data_dia','Data_mes',
+            'Data das odds_ano','Data das odds_dia','Data das odds_mes','Data das odds_min','Placar Exato_time_1',
+            'Placar Exato_time_2']
+
+        print(df['Data_ano'])
+        X = df[for_x].copy()
+        y = df[target_columns].copy()
+        print(X.describe())
+        print(y.describe())
+        
+        # Drop rows with missing values
+        combined = pd.concat([X, y], axis=1).dropna()
+        X = combined[X.columns]
+        y = combined[y.columns]
+        
+        # Train-test split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
+        # Train the model
+        model.fit(X_train, y_train)
+        
+        
+        print("Model trained successfully.")
+        # with open(create_dated_filename('model', 'pkl'), "wb") as f:
+        #     pickle.dump((model, X_train.columns.tolist()), f)
+        # with open(create_dated_filename('model', 'pkl'), "wb") as f:
+        #     pickle.dump(model, f)
+        predict(X=X_train, y=y_train, combined=combined)
+    except Exception as e:
+        print(f'Erro no treinamento {e}')
+        return None, None
+            
+        

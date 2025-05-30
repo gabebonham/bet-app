@@ -8,10 +8,12 @@ from tkinter import ttk, messagebox, filedialog
 from PIL import Image, ImageTk
 import sys
 import os
+import numpy as np
 from app.view.graphs.visualizer import BetMarketVisualizer
 from app.services.service import Service
 from app.view.graphs.graph import Graph
 from datetime import datetime
+from app.view.graphs.plotting_graphs import run_plotting
 class AppView:
     def __init__(self, root):
         self.root = root
@@ -21,6 +23,7 @@ class AppView:
         self.pred_treeview = ttk.Treeview()
         self.job = tk.BooleanVar(value=False)
         self.configurar_estilo()
+        self.tab_tabelas_graph = ttk.Treeview()
         self.predictions_tree_frame = None
         self.graph = Graph()
         self.last_prediction_hour = None
@@ -44,10 +47,9 @@ class AppView:
         self.hora_atual = tk.IntVar()
         self.num_horas = tk.IntVar()
         self.mercados_selecionados = {
-            "BTTS": tk.BooleanVar(value=True),
-            "OVER 2.5": tk.BooleanVar(value=True),
+            "BTTS": tk.BooleanVar(value=False),
+            "OVER 2.5": tk.BooleanVar(value=False),
             "OVER 3.5": tk.BooleanVar(value=False),
-            "UNDER 1.5": tk.BooleanVar(value=False),
             "UNDER 2.5": tk.BooleanVar(value=False),
             "UNDER 3.5": tk.BooleanVar(value=False)
         }
@@ -58,12 +60,11 @@ class AppView:
         self.tree_under25 = ttk.Treeview()
         self.tree_under35 = ttk.Treeview()
         self.mercado_treeviews = {
-            "BTTS": self.tree_btts,
-            "OVER 2.5": self.tree_over25,
-            "OVER 3.5": self.tree_over35,
-            "UNDER 1.5": self.tree_under15,
-            "UNDER 2.5": self.tree_under25,
-            "UNDER 3.5": self.tree_under35
+            "Odd BTTS": self.tree_btts,
+            "Odd Over 2.5": self.tree_over25,
+            "Odd Over 3.5": self.tree_over35,
+            "Odd Under 3.5": self.tree_under15,
+            "Odd Under 2.5": self.tree_under25,
         }
         self.train = tk.BooleanVar(value=True)
         self.create = tk.BooleanVar(value=True)
@@ -149,7 +150,7 @@ class AppView:
         self.notebook.add(self.tab_previsoes, text="Previsões")
         self.notebook.add(self.tab_analise, text="Análise")
         self.notebook.add(self.tab_tabelas, text="Tabelas Operacionais")
-        self.notebook.add(self.tab_configuracoes, text="Configurações")
+        # self.notebook.add(self.tab_configuracoes, text="Configurações")
         
         # Frame inferior - Status
         self.status_frame = ttk.Frame(self.main_frame)
@@ -294,35 +295,7 @@ O sistema inclui:
         )
         
         btn_modelo_create.pack(pady=(0, 10), anchor='w', padx=10)
-    def preencher_aba_tabela_consolidada(self):
-        """Preenche a aba de tabela consolidada"""
-        # Frame para exibir a tabela
-        frame_tabela = ttk.Frame(self.tab_tabela_consolidada)
-        frame_tabela.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
-        # Label para exibir a tabela como imagem
-        self.label_tabela_consolidada = ttk.Label(frame_tabela)
-        self.label_tabela_consolidada.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        
-        # Botões
-        frame_botoes = ttk.Frame(self.tab_tabela_consolidada)
-        frame_botoes.pack(fill=tk.X, padx=5, pady=5)
-        
-        ttk.Button(frame_botoes, text="Carregar Tabela", 
-                  command=self.carregar_tabela_consolidada).pack(side=tk.LEFT, padx=5)
-        
-        ttk.Button(frame_botoes, text="Exportar CSV", 
-                  command=self.exportar_tabela_consolidada_csv).pack(side=tk.LEFT, padx=5)
-        
-        ttk.Button(frame_botoes, text="Atualizar Tabela Consolidada", 
-                  command=self.atualizar_tabela_consolidada).pack(side=tk.LEFT, padx=5)
     
-    
-        
-        text_widget = tk.Text(frame_sobre, height=10, width=80, wrap=tk.WORD)
-        text_widget.insert(tk.END, texto_sobre)
-        text_widget.config(state=tk.DISABLED)
-        text_widget.pack(fill=tk.X, padx=5, pady=5)
     def preencher_aba_tabela(self, parent, mercado):
         """Preenche a aba de tabela para um mercado específico"""
         # Frame para exibir a tabela
@@ -356,58 +329,45 @@ O sistema inclui:
         self.analise_notebook.pack(fill=tk.BOTH, expand=True)
         
         # Abas para cada mercado
-        self.tab_analise_btts = ttk.Frame(self.analise_notebook)
-        self.tab_analise_over25 = ttk.Frame(self.analise_notebook)
-        self.tab_analise_over35 = ttk.Frame(self.analise_notebook)
-        self.tab_analise_comparativa = ttk.Frame(self.analise_notebook)
-        self.tab_analise_under25 = ttk.Frame(self.analise_notebook)
-        self.tab_analise_under35 = ttk.Frame(self.analise_notebook)
-        self.tab_analise_under15 = ttk.Frame(self.analise_notebook)
+        self.tab_analise_tabelas_graph = ttk.Frame(self.analise_notebook)
+        # self.tab_analise_over25 = ttk.Frame(self.analise_notebook)
+        # self.tab_analise_over35 = ttk.Frame(self.analise_notebook)
+        # self.tab_analise_comparativa = ttk.Frame(self.analise_notebook)
+        # self.tab_analise_under25 = ttk.Frame(self.analise_notebook)
+        # self.tab_analise_under35 = ttk.Frame(self.analise_notebook)
+        # self.tab_analise_under15 = ttk.Frame(self.analise_notebook)
         
-        self.analise_notebook.add(self.tab_analise_btts, text="BTTS")
-        self.analise_notebook.add(self.tab_analise_over25, text="OVER 2.5")
-        self.analise_notebook.add(self.tab_analise_over35, text="OVER 3.5")
-        self.analise_notebook.add(self.tab_analise_under15, text="UNDER 1.5")
-        self.analise_notebook.add(self.tab_analise_under25, text="UNDER 2.5")
-        self.analise_notebook.add(self.tab_analise_under35, text="UNDER 3.5")
-        self.analise_notebook.add(self.tab_analise_comparativa, text="Comparativa")
+        self.analise_notebook.add(self.tab_analise_tabelas_graph, text="GRAFICOS")
+        # self.analise_notebook.add(self.tab_analise_over25, text="OVER 2.5")
+        # self.analise_notebook.add(self.tab_analise_over35, text="OVER 3.5")
+        # self.analise_notebook.add(self.tab_analise_under15, text="UNDER 1.5")
+        # self.analise_notebook.add(self.tab_analise_under25, text="UNDER 2.5")
+        # self.analise_notebook.add(self.tab_analise_under35, text="UNDER 3.5")
+        # self.analise_notebook.add(self.tab_analise_comparativa, text="Comparativa")
         
         # Preencher abas de análise
-        self.preencher_aba_analise_mercado(self.tab_analise_btts, "btts")
-        self.preencher_aba_analise_mercado(self.tab_analise_over25, "over25")
-        self.preencher_aba_analise_mercado(self.tab_analise_over35, "over35")
-        self.preencher_aba_analise_mercado(self.tab_analise_under25, "under25")
+        self.preencher_aba_analise_mercado(self.tab_analise_tabelas_graph, "GRAFICOS")
+        # self.preencher_aba_analise_mercado(self.tab_analise_over25, "over25")
+        # self.preencher_aba_analise_mercado(self.tab_analise_over35, "over35")
+        # self.preencher_aba_analise_mercado(self.tab_analise_under25, "under25")
         
-        self.preencher_aba_analise_mercado(self.tab_analise_under15, "under15")
-        self.preencher_aba_analise_mercado(self.tab_analise_under35, "under35")
-        self.preencher_aba_analise_comparativa()
     
     def preencher_aba_analise_mercado(self, parent, mercado):
         """Preenche a aba de análise para um mercado específico"""
-        # Frame para seleção de gráficos
-        
         frame_selecao = ttk.LabelFrame(parent, text="Selecione o Gráfico")
-        frame_selecao.pack(fill=tk.X, padx=5, pady=5)  # Changed fill and side
-        # Frame para exibir o gráfico
+        frame_selecao.pack(fill=tk.X, padx=5, pady=5)
+        
         frame_grafico = ttk.LabelFrame(parent, text="Gráfico")
         frame_grafico.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # Variável para armazenar o gráfico selecionado
-        
-        
-        # Opções de gráficos
         opcoes = [
             "Taxa de Ocorrência por Campeonato",
             "Taxa de Ocorrência por Hora",
-            "Taxa de Ocorrência por Ciclo",
             "Heatmap Campeonato x Hora",
+            "Taxa de Ocorrência por Ciclo",
             "Heatmap Campeonato x Ciclo",
-            "Comparação de Mercados",
-            "Tendências por Hora",
-            "Correlações entre Mercados"
         ]
         
-        # Combobox para seleção de gráficos
         cb_graficos = ttk.Combobox(
             frame_selecao,
             textvariable=self.grafico_selecionado,
@@ -415,96 +375,54 @@ O sistema inclui:
             state="readonly",
             width=40)
         cb_graficos.current(0)
-        cb_graficos.pack(side=tk.LEFT, padx=10, pady=5)
-        
-        # Frame para exibição do gráfico
-        # Botão para exibir gráfico
+        # cb_graficos.pack(side=tk.LEFT, padx=10, pady=5)
         
         btn_exibir = ttk.Button(
             frame_selecao,
-            text="Exibir Gráfico",
-            command=lambda: self.display(mercado, frame_grafico)
-        )
+            text="Criar Gráfico",
+            command=lambda: self.display(mercado, frame_grafico))
         btn_exibir.pack(fill=tk.NONE, side='left', padx=5, pady=5)
+        
         self.image_label = ttk.Label(frame_grafico)
         self.image_label.pack(fill=tk.BOTH, expand=True)
 
-        self.comparison_label = ttk.Label(frame_grafico)
-        self.comparison_label.pack(fill=tk.BOTH, expand=True)
 
     def display(self, mercado, frame):
-        image_path = ''
-        if mercado:
-            image_path = self.graph.exibir_grafico(mercado, self.grafico_selecionado.get())
-        else:
-            image_path = self.graph.exibir_grafico_comparativo(self.grafico_comparativo_selecionado.get())
-
         try:
-            # Clear previous image (if any)
-            for widget in frame.winfo_children():
-                widget.destroy()
+            # Clear previous widgets in frame
+            # for widget in frame.winfo_children():
+            #     widget.destroy()
+                
+            # Get the plot image
+            self.service.run_plotting_service()
+            # if not image_path:
+            #     return
+                
+            # # Create scrollable canvas
+            # canvas = tk.Canvas(frame)
+            # scroll_x = tk.Scrollbar(frame, orient="horizontal", command=canvas.xview)
+            # scroll_y = tk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+            # canvas.configure(xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set)
 
-            # Create scrollable canvas
-            canvas = tk.Canvas(frame, width=600, height=400)
-            scroll_x = tk.Scrollbar(frame, orient="horizontal", command=canvas.xview)
-            scroll_y = tk.Scrollbar(frame, orient="vertical", command=canvas.yview)
-            canvas.configure(xscrollcommand=scroll_x.set, yscrollcommand=scroll_y.set)
+            # scroll_x.pack(side="bottom", fill="x")
+            # scroll_y.pack(side="right", fill="y")
+            # canvas.pack(side="left", fill="both", expand=True)
 
-            scroll_x.pack(side="bottom", fill="x")
-            scroll_y.pack(side="right", fill="y")
-            canvas.pack(side="left", fill="both", expand=True)
-
-            # Create inner frame to hold the image
-            image_frame = tk.Frame(canvas)
-            canvas.create_window((0, 0), window=image_frame, anchor="nw")
-
-            # Load image
-            img = Image.open(image_path)
-            self.original_img_size = img.size  # Save original size in case of zoom/pan features later
-            img = img.resize((800, 600), Image.LANCZOS)
-            self.current_image = ImageTk.PhotoImage(img)
-
-            # Create and place label inside the frame
-            image_label = ttk.Label(image_frame, image=self.current_image)
-            image_label.image = self.current_image  # Keep reference
-            image_label.pack()
-
-            # Update scroll region
-            image_frame.update_idletasks()
-            canvas.config(scrollregion=canvas.bbox("all"))
-
+            # # Load and display image
+            # img = Image.open(image_path)
+            # self.current_image = ImageTk.PhotoImage(img)
+            
+            # canvas.create_image(0, 0, image=self.current_image, anchor="nw")
+            # canvas.config(scrollregion=canvas.bbox("all"))
+            
+            # # Clean up temporary file
+            # os.unlink(image_path)
+            
         except Exception as e:
             messagebox.showerror("Erro", f"Falha ao exibir imagem: {str(e)}")
-    def preencher_aba_analise_comparativa(self):
-        """Preenche a aba de análise comparativa"""
-        
-        # Frame para seleção de gráficos
-        frame_selecao = ttk.LabelFrame(self.tab_analise_comparativa, text="Selecione o Gráfico")
-        frame_selecao.pack(fill=tk.X, padx=5, pady=5)
-        
-        # Variável para armazenar o gráfico selecionado
-        
-        
-        # Opções de gráficos
-        opcoes = [
-            'Comparação de Ciclos entre Mercados',
-'Comparação de Taxas entre Mercados'
-        ]
-        
-        # Combobox para seleção
-        combo = ttk.Combobox(frame_selecao, textvariable=self.grafico_comparativo_selecionado, 
-                            values=opcoes, state="readonly", width=40)
-        combo.current(0)
-        combo.pack(side=tk.LEFT, padx=10, pady=5)
-        # Frame para exibir o gráfico
-        frame_grafico = ttk.LabelFrame(self.tab_analise_comparativa, text="Gráfico")
-        frame_grafico.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
-        # Botão para exibir gráfico
-        ttk.Button(frame_selecao, text="Exibir", 
-                  command=lambda:self.display(mercado=None,frame=frame_grafico)).pack(side=tk.LEFT, padx=5, pady=5)
-        
+   
     def preencher_aba_tabelas(self):
-        """Preenche a aba de tabelas operacionais com uma única tabela consolidada"""
+        """Preenche a aba de tabelas operacionais com uma tabela que se adapta ao DataFrame recebido"""
         # Frame principal para a tabela
         self.tabela_frame = ttk.Frame(self.tab_tabelas)
         self.tabela_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
@@ -513,58 +431,22 @@ O sistema inclui:
         self.hscroll = ttk.Scrollbar(self.tabela_frame, orient=tk.HORIZONTAL)
         self.vscroll = ttk.Scrollbar(self.tabela_frame, orient=tk.VERTICAL)
         
-        # Treeview com todas as colunas
-        columns = [
-            "id_partida", "campeonato", "data", "tempo", 
-            "time_casa", "time_contra", "gols_casa", "gols_contra",
-            "gols_totais", "odd_over25", "odd_under25", "odd_over35",
-            "odd_under35", "odd_casa", "odd_empate", "odd_visitante",
-            "placar_exato", "odd_placar_exato", "data_odds"
-        ]
-        
+        # Treeview - colunas serão definidas dinamicamente
         self.treeview_tabela = ttk.Treeview(
             self.tabela_frame,
-            columns=columns,
             show="headings",
             xscrollcommand=self.hscroll.set,
             yscrollcommand=self.vscroll.set
         )
         
-        # Configurar colunas
-        colunas = [
-            ("ID Partida", 80),
-            ("Campeonato", 100),
-            ("Data", 80),
-            ("Tempo", 60),
-            ("Time Casa", 100),
-            ("Time Contra", 100),
-            ("Gols Casa", 70),
-            ("Gols Contra", 70),
-            ("Gols Totais", 70),
-            ("Odd Over 2.5", 90),
-            ("Odd Under 2.5", 90),
-            ("Odd Over 3.5", 90),
-            ("Odd Under 3.5", 90),
-            ("Odd Casa", 80),
-            ("Odd Empate", 80),
-            ("Odd Visitante", 80),
-            ("Placar Exato", 80),
-            ("Odd Placar", 80),
-            ("Data Odds", 120)
-        ]
-        
-        for (col_text, width), col_id in zip(colunas, columns):
-            self.treeview_tabela.heading(col_id, text=col_text)
-            self.treeview_tabela.column(col_id, width=width, anchor=tk.CENTER)
+        # Configurar scrollbars
+        self.vscroll.config(command=self.treeview_tabela.yview)
+        self.hscroll.config(command=self.treeview_tabela.xview)
         
         # Posicionar widgets
         self.treeview_tabela.grid(row=0, column=0, sticky="nsew")
         self.vscroll.grid(row=0, column=1, sticky="ns")
         self.hscroll.grid(row=1, column=0, sticky="ew")
-        
-        # Configurar scrollbars
-        self.vscroll.config(command=self.treeview_tabela.yview)
-        self.hscroll.config(command=self.treeview_tabela.xview)
         
         # Configurar expansão
         self.tabela_frame.grid_rowconfigure(0, weight=1)
@@ -575,10 +457,59 @@ O sistema inclui:
         btn_frame.pack(fill=tk.X, padx=5, pady=5)
         
         # Botões
-        ttk.Button(btn_frame, text="Carregar Dados", command=lambda:self.service.carregar_dados_partidas(self.treeview_tabela)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Exportar CSV", command=lambda:self.service.exportar_dados_csv(self.treeview_tabela)).pack(side=tk.LEFT, padx=5)
-        ttk.Button(btn_frame, text="Atualizar Dados", command=lambda:self.service.atualizar_dados_partidas(self.treeview_tabela)).pack(side=tk.LEFT, padx=5)
+        ttk.Button(
+            btn_frame, 
+            text="Carregar Dados", 
+            command=lambda: self.carregar_dados_na_tabela()
+        ).pack(side=tk.LEFT, padx=5)
 
+    def carregar_dados_na_tabela(self):
+        """Carrega dados do DataFrame na treeview, adaptando-se às colunas existentes"""
+        try:
+            # Limpar treeview existente
+            self.treeview_tabela.delete(*self.treeview_tabela.get_children())
+            file_path = filedialog.askopenfilename(title="Selecione a Tabla ", filetypes=[("Todos os Arquivos", "*.*")])
+        
+            # Obter DataFrame do serviço
+            df = pd.read_csv(file_path)  # Supondo que este método retorna o DataFrame
+            
+            if df is None or df.empty:
+                messagebox.showwarning("Aviso", "Nenhum dado disponível para exibir")
+                return
+                
+            # Configurar colunas dinamicamente
+            colunas = df.columns.tolist()
+            self.treeview_tabela["columns"] = colunas
+            
+            # Configurar cabeçalhos e larguras das colunas
+            for col in colunas:
+                # Converter nomes de colunas para formato mais amigável
+                col_name = col.replace("_", " ").title()
+                self.treeview_tabela.heading(col, text=col_name)
+                
+                # Definir largura baseada no tipo de dado
+                if df[col].dtype in ['int64', 'float64']:
+                    width = 80  # Colunas numéricas mais estreitas
+                else:
+                    width = 120  # Colunas de texto mais largas
+                    
+                self.treeview_tabela.column(col, width=width, anchor=tk.CENTER)
+            
+            # Inserir dados
+            for _, row in df.iterrows():
+                values = []
+                for col in colunas:
+                    value = row[col]
+                    # Formatando valores numéricos para 2 casas decimais
+                    if isinstance(value, (float, np.floating)):
+                        values.append(f"{value:.2f}" if not pd.isna(value) else "")
+                    else:
+                        values.append(str(value) if not pd.isna(value) else "")
+                
+                self.treeview_tabela.insert("", tk.END, values=values)
+                
+        except Exception as e:
+            messagebox.showerror("Erro", f"Falha ao carregar dados: {str(e)}")
     def preencher_controles(self):
         """Preenche o frame de controles"""
         # Frame para hora e número de horas
@@ -597,9 +528,9 @@ O sistema inclui:
         frame_mercados = ttk.LabelFrame(self.control_frame, text="Mercados")
         frame_mercados.pack(side=tk.LEFT, fill=tk.X, padx=10, pady=5)
         
-        for i, (mercado, var) in enumerate(self.mercados_selecionados.items()):
-            ttk.Checkbutton(frame_mercados, text=mercado, variable=var).grid(
-                row=0, column=i, padx=10, pady=5)
+        # for i, (mercado, var) in enumerate(self.mercados_selecionados.items()):
+        #     ttk.Checkbutton(frame_mercados, text=mercado, variable=var).grid(
+        #         row=0, column=i, padx=10, pady=5)
         
         
     def preencher_aba_previsoes(self):
@@ -633,7 +564,10 @@ O sistema inclui:
         
         # Create tabs for all markets
         markets = [
-            ("MERCADOS", "MERCADOS"),
+            ("EURO", "EURO"),
+            ("SUPER", "SUPER"),
+            ("PREMIER", "PREMIER"),
+            ("COPA", "COPA"),
         ]
         
         # Create tabs dynamically
@@ -644,7 +578,21 @@ O sistema inclui:
             self.previsoes_notebook.add(frame, text=market_name)
             self.market_frames[market_id] = frame
             self._create_market_tab(frame, market_name)
+        btn_frame = ttk.Frame(self.previsoes_frame)
+        btn_frame.pack(fill=tk.X, pady=5)
+        butn = ttk.Button(btn_frame, text='Gerar Previsões', command=lambda:self.execute_foreach(frame))
+        butn.pack(side=tk.LEFT, padx=2)
+    def execute_foreach(self, frame):
         
+        self.service.gerar_previsoes(
+            self.hora_atual.get(),
+            self.num_horas.get(),
+            self.market_frames,
+            self.create,
+            self.train,
+            self.current_file.get(),
+            self.current_model_file.get(),
+        )
 
     def _create_market_tab(self, parent, market_id):
         """Creates UI elements for a specific market tab"""
@@ -655,16 +603,16 @@ O sistema inclui:
         # Treeview with scrollbar
         tree_frame = ttk.Frame(container)
         tree_frame.pack(fill=tk.BOTH, expand=True)
+        
         self.predictions_tree_frame = tree_frame
         scrollbar = ttk.Scrollbar(tree_frame)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         mercados = [
-            "BTTS",
-            "OVER 2.5",
-            "OVER 3.5",
-            "UNDER 1.5",
-            "UNDER 2.5",
-            "UNDER 3.5",
+            "Odd BTTS",
+            "Odd Over 2.5",
+            "Odd Over 3.5",
+            "Odd Under 2.5",
+            "Odd Under 3.5",
         ]
         # for mercado in mercados:
         #     self.mercado_treeviews[mercado] = treeview = ttk.Treeview(
@@ -679,8 +627,7 @@ O sistema inclui:
         # Store reference
         # setattr(self, f"treeview_{market_id}", treeview)
         # Button panel
-        btn_frame = ttk.Frame(container)
-        btn_frame.pack(fill=tk.X, pady=5)
+        
         """Gera previsões para os mercados selecionados"""
         hora_atual = self.hora_atual.get()
         num_horas = self.num_horas.get()
@@ -692,18 +639,18 @@ O sistema inclui:
             ("", )
         ]
         
-        butn = ttk.Button(btn_frame, text='Gerar Previsões', command=lambda: self.service.gerar_previsoes(
-            self.hora_atual.get(),
-            self.num_horas.get(),
-            tree_frame,
-            market_id,
-            self.create,
-            self.train,
-            self.current_file.get(),
-            self.current_model_file.get()
+        # butn = ttk.Button(btn_frame, text='Gerar Previsões', command=lambda: self.service.gerar_previsoes(
+        #     self.hora_atual.get(),
+        #     self.num_horas.get(),
+        #     tree_frame,
+        #     market_id,
+        #     self.create,
+        #     self.train,
+        #     self.current_file.get(),
+        #     self.current_model_file.get()
             
-        ))
-        butn.pack(side=tk.LEFT, padx=2)
+        # ))
+        # butn.pack(side=tk.LEFT, padx=2)
 
     def delete_flag(self):
         if os.path.exists('flag.txt'):
@@ -720,19 +667,19 @@ O sistema inclui:
         hours = [0, 6, 12, 18, 20]
         now = datetime.now()
         current_hour = now.hour
-
+        # frame = ttk.Frame(self.previsoes_notebook)
+        # self._create_market_tab(frame, 'market_name')
         if current_hour in hours:
             if self.last_prediction_hour != current_hour:
                 print(f"Running prediction at {current_hour}")
                 self.service.gerar_previsoes(
                     self.hora_atual.get(),
                     self.num_horas.get(),
-                    self.predictions_tree_frame,
-                    'MERCADOS',
+                    self.market_frames,
                     self.create,
                     self.train,
                     self.current_file.get(),
-                    self.current_model_file.get()
+                    self.current_model_file.get(),
                 )
                 self.last_prediction_hour = current_hour
             else:

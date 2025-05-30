@@ -58,7 +58,7 @@ class Graph:
             if grafico == "Taxa de Ocorrência por Campeonato":
                 output_file = self.visulizer.plot_occurrence_by_championship(df, mercado)
             elif grafico == "Taxa de Ocorrência por Hora":
-                output_file = self.visulizer.plot_occurrence_by_hour(df, mercado)
+                output_file = self.visulizer.plot_occurrence_by_championship_and_hour(df, mercado)
             elif grafico == "Taxa de Ocorrência por Ciclo":
                 output_file = self.visulizer.plot_occurrence_by_cycle(df, mercado)
             elif grafico == "Heatmap Campeonato x Hora":

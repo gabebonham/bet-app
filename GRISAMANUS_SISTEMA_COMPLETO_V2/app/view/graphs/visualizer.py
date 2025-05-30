@@ -15,7 +15,7 @@ def get_base_path():
 def get_generated_path():
     """Get the correct path to generated files"""
     base = get_base_path()
-    path = os.path.join(base,'..','generated')
+    path = os.path.join(base,'app','generated')
     return path
 BASE_DIR = get_base_path()
 GENERATED_PATH = get_generated_path()
@@ -99,7 +99,7 @@ def create_dated_filename(name, extension="pkl", directory="."):
     full_path = os.path.join(get_generated_path(), filename)
     return full_path
 class BetMarketVisualizer:
-    def __init__(self, output_dir='../temp_plots'):
+    def __init__(self, output_dir=get_generated_path()):
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
         self.markets = {
@@ -156,7 +156,70 @@ class BetMarketVisualizer:
         df['CICLO'] = pd.to_datetime(df['Data']).dt.to_period('M')
         df['OCORRENCIA'] = df['OCORRENCIA'].astype(int)
         return df
-
+    def plot_occurrence_by_championship_and_hour(self, df, market_name, title_suffix="", top_n=5):
+        """Plot occurrence rate by championship AND hour (faceted) with rounded hours"""
+        try:
+            df = self._ensure_occurrence(df, market_name)
+            
+            # Round the 'HORA' column to the nearest hour (if it's not already an integer)
+            df['HORA'] = df['HORA'].round().astype(int)
+            
+            # Get top N championships by occurrence rate
+            top_champs = df.groupby('Campeonato')['OCORRENCIA'].mean().nlargest(top_n).index
+            
+            # Filter data to only include top championships
+            filtered_df = df[df['Campeonato'].isin(top_champs)]
+            
+            # Group by championship and hour
+            grouped_data = filtered_df.groupby(['Campeonato', 'HORA'])['OCORRENCIA'].mean().reset_index()
+            
+            # Create a FacetGrid with one plot per championship
+            g = sns.FacetGrid(
+                grouped_data,
+                col='Campeonato',
+                col_wrap=3,  # Adjust based on how many columns you want
+                height=4,
+                aspect=1.5,
+                sharey=True
+            )
+            
+            # Plot bar + line for each championship
+            g.map_dataframe(
+                sns.barplot,
+                x='HORA',
+                y='OCORRENCIA',
+                color=self.markets[market_name]['color'],
+                alpha=0.7
+            )
+            
+            g.map_dataframe(
+                sns.lineplot,
+                x='HORA',
+                y='OCORRENCIA',
+                color='darkred',
+                linewidth=1.5
+            )
+            
+            # Customize titles and labels
+            g.set_axis_labels("Hora do Dia", "Taxa de Ocorrência (%)")
+            g.set_titles(col_template="{col_name}")
+            g.fig.suptitle(f'Taxa de Ocorrência {market_name} por Hora (Top {top_n} Campeonatos)\n{title_suffix}', y=1.02)
+            
+            # Adjust layout
+            plt.tight_layout()
+            
+            # Save plot
+            output_file = os.path.join(
+                self.output_dir,
+                f'taxa_ocorrencia_champ_hora_{market_name.lower().replace(" ", "_")}.png'
+            )
+            plt.savefig(output_file, dpi=300, bbox_inches='tight')
+            plt.close()
+            return output_file
+            
+        except Exception as e:
+            plt.close()
+            raise ValueError(f"Failed to plot occurrence by championship and hour: {str(e)}")
     def plot_occurrence_by_hour(self, df, market_name, title_suffix=""):
         """Plot occurrence rate by hour of day for a specific market"""
         try:
