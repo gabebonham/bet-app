@@ -21,7 +21,7 @@ import itertools
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import numpy as np
-from datetime import datetime
+from datetime import datetime,timedelta
 def get_base_path():
     import os
 
@@ -253,6 +253,7 @@ def process_for_cup(team_df, start_cup_df, name):
     metrics_df.to_csv('app\\generated\\metrics.csv', index=False)
     start_cup_df['Casa Gols Previsão'] = prediction_home
     start_cup_df['Visitante Gols Previsão'] = prediction_away
+    start_cup_df = start_cup_df.drop(['Data_ano','Data_mes','Data_dia'], axis=1)
     start_cup_df.to_csv(f'app\\generated\\{name}_{datetime.now().strftime("%d-%m-%Y_%H-%M-%S")}.csv', index=False)
 
 def process_prediction(hora_atual,numero_horas):
@@ -269,14 +270,37 @@ def process_prediction(hora_atual,numero_horas):
     # print(259)
     # 
     # 
-    hora_min = hora_atual
-    hora_max = hora_min + numero_horas
-    horas_reais = range(hora_min,hora_max)
+    hora_min = datetime.now()
+    hora_max = hora_min + timedelta(hours=6)
+
+    # Get total minutes (int)
+    total_minutes = int((hora_max - hora_min).total_seconds() / 60)
+
+    # Generate a list of datetimes at 1-minute intervals
+    time_list = [hora_min + timedelta(minutes=i) for i in range(total_minutes + 1)]
+    horas_reais = []
+    for i in time_list:
+        horas_reais.append(i.hour)
     time_period = {}
     for hora in horas_reais:
         time_period[hora] = []
         for minute in range(2,60,3):
             time_period[hora].append(minute)
+    time_period_copa_super = {}
+    for hora in horas_reais:
+        time_period_copa_super[hora] = []
+        for minute in range(1,60,3):
+            time_period_copa_super[hora].append(minute)
+    time_period_premier = {}
+    for hora in horas_reais:
+        time_period_premier[hora] = []
+        for minute in range(0,60,3):
+            time_period_premier[hora].append(minute)
+
+
+
+
+
     # print('time_period')
     # print(time_period)
     #   
@@ -297,10 +321,10 @@ def process_prediction(hora_atual,numero_horas):
     # 
     # print(all_teams)
     
-    column_euro = {'HORA':[],'COLUNA':[], 'Time_Contra':[], 'Time_Casa':[]}
-    column_premier = {'HORA':[],'COLUNA':[], 'Time_Contra':[], 'Time_Casa':[]}
-    column_super = {'HORA':[],'COLUNA':[], 'Time_Contra':[], 'Time_Casa':[]}
-    column_copa = {'HORA':[],'COLUNA':[], 'Time_Contra':[], 'Time_Casa':[]}
+    column_euro = {'HORA':[],'COLUNA':[], 'Time_Casa':[], 'Time_Contra':[]}
+    column_premier = {'HORA':[],'COLUNA':[], 'Time_Casa':[], 'Time_Contra':[]}
+    column_super = {'HORA':[],'COLUNA':[], 'Time_Casa':[], 'Time_Contra':[]}
+    column_copa = {'HORA':[],'COLUNA':[], 'Time_Casa':[], 'Time_Contra':[]}
     for hour, minutes in time_period.items():
         for minute in minutes:
             for cup, teams in all_teams.items():
@@ -313,24 +337,56 @@ def process_prediction(hora_atual,numero_horas):
                         column_euro['COLUNA'].append(minute)
                         column_euro['Time_Contra'].append(team_y)
                         column_euro['Time_Casa'].append(team_x)
-                    elif cup == 'Premier':
-                        team_x, team_y = team_pair.split('-')
-                        column_premier['HORA'].append(hour)
-                        column_premier['COLUNA'].append(minute)
-                        column_premier['Time_Contra'].append(team_y)
-                        column_premier['Time_Casa'].append(team_x)
-                    elif cup == 'Super':
+                        
+                        column_euro['HORA'].append(hour)
+                        column_euro['COLUNA'].append(minute)
+                        column_euro['Time_Contra'].append(team_x)
+                        column_euro['Time_Casa'].append(team_y)
+    for hour, minutes in time_period_copa_super.items():
+        for minute in minutes:
+            for cup, teams in all_teams.items():
+                team_pairs = [f"{x}-{y}" for x, y in itertools.combinations(teams, 2)]
+                time_str = f"{hour:02d}:{minute:02d}"
+                for team_pair in team_pairs:
+                    if cup == 'Super':
                         team_x, team_y = team_pair.split('-')
                         column_super['HORA'].append(hour)
                         column_super['COLUNA'].append(minute)
                         column_super['Time_Contra'].append(team_y)
                         column_super['Time_Casa'].append(team_x)
+                        
+                        column_super['HORA'].append(hour)
+                        column_super['COLUNA'].append(minute)
+                        column_super['Time_Contra'].append(team_x)
+                        column_super['Time_Casa'].append(team_y)
                     elif cup == 'Copa':
                         team_x, team_y = team_pair.split('-')
                         column_copa['HORA'].append(hour)
                         column_copa['COLUNA'].append(minute)
                         column_copa['Time_Contra'].append(team_y)
                         column_copa['Time_Casa'].append(team_x)
+                        
+                        column_copa['HORA'].append(hour)
+                        column_copa['COLUNA'].append(minute)
+                        column_copa['Time_Contra'].append(team_x)
+                        column_copa['Time_Casa'].append(team_y)
+    for hour, minutes in time_period_premier.items():
+        for minute in minutes:
+            for cup, teams in all_teams.items():
+                team_pairs = [f"{x}-{y}" for x, y in itertools.combinations(teams, 2)]
+                time_str = f"{hour:02d}:{minute:02d}"
+                for team_pair in team_pairs:
+                    if cup == 'Premier':
+                        team_x, team_y = team_pair.split('-')
+                        column_premier['HORA'].append(hour)
+                        column_premier['COLUNA'].append(minute)
+                        column_premier['Time_Contra'].append(team_y)
+                        column_premier['Time_Casa'].append(team_x)
+                        
+                        column_premier['HORA'].append(hour)
+                        column_premier['COLUNA'].append(minute)
+                        column_premier['Time_Contra'].append(team_x)
+                        column_premier['Time_Casa'].append(team_y)
     # print(column_euro)
     start_euro_df = pd.DataFrame(column_euro)
     start_premier_df = pd.DataFrame(column_premier)
@@ -358,10 +414,10 @@ def process_prediction(hora_atual,numero_horas):
         team_df['Data_dia'] = pd.to_datetime(team_df['Data'], format='%Y-%m-%d').dt.day.astype(int)
         team_df['HORA'] = pd.to_datetime(team_df['Tempo'], format='%H:%M').dt.hour.astype(int)
         team_df['COLUNA'] = pd.to_datetime(team_df['Tempo'], format='%H:%M').dt.minute.astype(int)
-        team_df['Time_Contra'] = pd.Categorical(team_df['Time contra'])
         team_df['Time_Casa'] = pd.Categorical(team_df['Time da casa'])
-        team_df['Time contra'] = pd.Categorical(team_df['Time contra'])
         team_df['Time da casa'] = pd.Categorical(team_df['Time da casa'])
+        team_df['Time_Contra'] = pd.Categorical(team_df['Time contra'])
+        team_df['Time contra'] = pd.Categorical(team_df['Time contra'])
         
         home_goals = []
         away_goals = []

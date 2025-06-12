@@ -22,10 +22,17 @@ class AppView:
         self.root.minsize(1000, 700)
         self.pred_treeview = ttk.Treeview()
         self.job = tk.BooleanVar(value=False)
+        self.job_future = tk.BooleanVar(value=False)
         self.configurar_estilo()
         self.tab_tabelas_graph = ttk.Treeview()
         self.predictions_tree_frame = None
         self.graph = Graph()
+        self.metrics_dict = {
+            'mae_home':tk.DoubleVar(),
+            'mae_away':tk.DoubleVar(),
+            'r2_home':tk.DoubleVar(),
+            'r2_away':tk.DoubleVar(),
+        }
         self.last_prediction_hour = None
         self.visualizer = BetMarketVisualizer()
         self.service = Service()
@@ -82,6 +89,7 @@ class AppView:
         self.support_columns = tk.Variable(value=[])
         
         self.preencher_interface()
+        self.verify_future_job()
         self.verify_job()
     def atualizar_datetime(self):
         """Atualiza o label de data e hora"""
@@ -91,6 +99,10 @@ class AppView:
         if self.job.get():
             self.run_prediction_job()
         self.root.after(6000, self.verify_job)
+    def verify_future_job(self):
+        if self.job_future.get():
+            self.run_get_future_job()
+        self.root.after(60000, self.verify_future_job)
     def carregar_configuracoes(self):
         """Carrega as configurações salvas"""
         try:
@@ -171,7 +183,7 @@ class AppView:
         
         # Preencher abas
         
-        self.criar_treeview_previsoes(self.pred_treeview)
+        self.criar_treeview_previsoes(self.metrics_dict)
         self.preencher_aba_analise()
         self.preencher_aba_tabelas()
         self.preencher_aba_configuracoes()
@@ -253,8 +265,21 @@ O sistema inclui:
     def preencher_aba_treinamento(self):
         # Main frame for the tab
         frame_config = ttk.LabelFrame(self.tab_previsoes, text="Sessão de Treinamento", padding=(10, 10))
-        frame_config.pack(fill=tk.X,side=tk.LEFT, padx=10, pady=10)
-
+        frame_config.pack(fill=tk.X,side=tk.LEFT, padx=0, pady=10)
+        # self.previsoes_frame = ttk.Frame(self.tab_previsoes)
+        # self.previsoes_frame.pack(fill=tk.BOTH,side=tk.RIGHT, anchor='e',expand=True, padx=5, pady=5)
+        home_frame = ttk.Frame(frame_config)
+        away_frame = ttk.Frame(frame_config)
+        home_frame.pack(anchor='w')
+        away_frame.pack(anchor='w')
+        ttk.Label(home_frame, text='MAE CASA').pack(padx=2, pady=2)
+        ttk.Label(home_frame, textvariable=self.metrics_dict['mae_home']).pack(padx=2, pady=2)
+        ttk.Label(home_frame, text='R2 CASA').pack(padx=2, pady=2)
+        ttk.Label(home_frame, textvariable=self.metrics_dict['r2_home']).pack(padx=2, pady=2)
+        ttk.Label(away_frame, text='MAE VISITANTE').pack(padx=2, pady=2)
+        ttk.Label(away_frame, textvariable=self.metrics_dict['mae_away']).pack(padx=2, pady=2)
+        ttk.Label(away_frame, text='R2 VISITANTE').pack(padx=2, pady=2)
+        ttk.Label(away_frame, textvariable=self.metrics_dict['r2_away']).pack(padx=2, pady=2)
         # Style configuration
         style = ttk.Style()
         style.configure("Custom.TButton", font=("Segoe UI", 10), padding=6)
@@ -264,6 +289,9 @@ O sistema inclui:
         #         padx=10, pady=5)
         # File selection button - Tabela Verdadeira
         ttk.Checkbutton(frame_config, text='Ativar Previsão Automatica', variable=self.job).pack(
+                 padx=10, pady=5)
+        # File selection button - Tabela Verdadeira
+        ttk.Checkbutton(frame_config, text='Ativar Previsão (Futuro) Automatica', variable=self.job_future).pack(
                  padx=10, pady=5)
         btn_tabela = ttk.Button(
             frame_config, 
@@ -551,13 +579,24 @@ O sistema inclui:
         
         
     
-    def criar_treeview_previsoes(self, treeview):
+    def criar_treeview_previsoes(self, metrics_dict):
         """Preenche a aba de previsões com notebooks para cada mercado"""
         self.preencher_aba_treinamento()
         # Main frame
         self.previsoes_frame = ttk.Frame(self.tab_previsoes)
         self.previsoes_frame.pack(fill=tk.BOTH,side=tk.RIGHT, anchor='e',expand=True, padx=5, pady=5)
-        
+        # home_frame = ttk.Frame(self.tab_previsoes)
+        # away_frame = ttk.Frame(self.tab_previsoes)
+        # home_frame.pack(anchor='nw')
+        # away_frame.pack(anchor='nw')
+        # ttk.Label(home_frame, text='MAE CASA').pack(padx=5, pady=5)
+        # ttk.Label(home_frame, textvariable=self.metrics_dict['mae_home']).pack(padx=5, pady=5)
+        # ttk.Label(home_frame, text='R2 CASA').pack(padx=5, pady=5)
+        # ttk.Label(home_frame, textvariable=self.metrics_dict['r2_home']).pack(padx=5, pady=5)
+        # ttk.Label(away_frame, text='MAE VISITANTE').pack(padx=5, pady=5)
+        # ttk.Label(away_frame, textvariable=self.metrics_dict['mae_away']).pack(padx=5, pady=5)
+        # ttk.Label(away_frame, text='R2 VISITANTE').pack(padx=5, pady=5)
+        # ttk.Label(away_frame, textvariable=self.metrics_dict['r2_away']).pack(padx=5, pady=5)
         # Notebook (tabbed interface)
         self.previsoes_notebook = ttk.Notebook(self.previsoes_frame)
         self.previsoes_notebook.pack(fill=tk.BOTH, expand=True)
@@ -578,11 +617,12 @@ O sistema inclui:
             self.previsoes_notebook.add(frame, text=market_name)
             self.market_frames[market_id] = frame
             self._create_market_tab(frame, market_name)
+        
         btn_frame = ttk.Frame(self.previsoes_frame)
         btn_frame.pack(fill=tk.X, pady=5)
-        butn = ttk.Button(btn_frame, text='Gerar Previsões', command=lambda:self.execute_foreach(frame))
+        butn = ttk.Button(btn_frame, text='Gerar Previsões', command=lambda:self.execute_foreach(metrics_dict))
         butn.pack(side=tk.LEFT, padx=2)
-    def execute_foreach(self, frame):
+    def execute_foreach(self, metrics_dict):
         
         self.service.gerar_previsoes(
             self.hora_atual.get(),
@@ -592,6 +632,8 @@ O sistema inclui:
             self.train,
             self.current_file.get(),
             self.current_model_file.get(),
+            metrics_dict,
+            False
         )
 
     def _create_market_tab(self, parent, market_id):
@@ -679,13 +721,61 @@ O sistema inclui:
                     self.create,
                     self.train,
                     self.current_file.get(),
-                    self.current_model_file.get(),
+                    self.current_model_file.get(),self.metrics_dict,False
                 )
                 self.last_prediction_hour = current_hour
             else:
                 print("Already ran for this hour.")
         else:
             self.last_prediction_hour = None  # Allow run in next valid hour
+    def run_get_future_job(self):
+        print('Future Job Running')
+        time_period_euro = []
+        for minute in range(2,60,3):
+            time_period_euro.append(minute)
+        time_period_copa_super = []
+        for minute in range(1,60,3):
+            time_period_copa_super.append(minute)
+        time_period_premier = []
+        for minute in range(0,60,3):
+            time_period_premier.append(minute)
+        current_minute = datetime.now().minute
+        if current_minute in time_period_euro:
+            self.service.gerar_previsoes(
+                    self.hora_atual.get(),
+                    self.num_horas.get(),
+                    self.market_frames,
+                    self.create,
+                    self.train,
+                    self.current_file.get(),
+                    self.current_model_file.get(),self.metrics_dict,
+                    True
+                )
+        if current_minute in time_period_copa_super:
+            self.service.gerar_previsoes(
+                    self.hora_atual.get(),
+                    self.num_horas.get(),
+                    self.market_frames,
+                    self.create,
+                    self.train,
+                    self.current_file.get(),
+                    self.current_model_file.get(),self.metrics_dict,True
+                )
+        if current_minute in time_period_premier:
+            self.service.gerar_previsoes(
+                    self.hora_atual.get(),
+                    self.num_horas.get(),
+                    self.market_frames,
+                    self.create,
+                    self.train,
+                    self.current_file.get(),
+                    self.current_model_file.get(),self.metrics_dict,True
+                )
+        print('Future Job Done')
+        
+    
+        
+           
             
 
 

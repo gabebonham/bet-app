@@ -1,6 +1,6 @@
 import pandas as pd
 import seaborn as sns
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import sys
 import numpy as np
@@ -14,6 +14,7 @@ import glob
 from app.ml.implementacao_drisamanus_corrigida import execute
 from app.ml.betting_config import BettingConfig
 from app.ml.prediction_processing import process_prediction
+from app.bet.apiCallsService import getFutureData
 from app.bet.main import execute_api_call
 from app.view.graphs.plotting_graphs import run_plotting
 class Service:
@@ -27,6 +28,7 @@ class Service:
         self.current_model_file = ''
         self.x_path = None
         self.y_path = None
+        self.df_metrics = pd.DataFrame()
         self.mercados_selecionados = [
             "BTTS",
             "OVER 2.5",
@@ -134,23 +136,31 @@ class Service:
         directory = os.path.join('..',directory)
         full_path = os.path.join(self.get_generated_path(), filename)
         return full_path
-    def gerar_previsoes(self, hora_atual, num_horas, market_frames, create, train, table, model):
+    def gerar_previsoes(self, hora_atual, num_horas, market_frames, create, train, table, model, metrics_dict, api_call):
         """
         Gera previsões para os mercados selecionados e popula os treeviews correspondentes.
         """
-        execute_api_call(6)
+        print('gerar_previsoes Running')
         
-        if (self.x_path and not self.y_path) or (not self.x_path and self.y_path):
-            messagebox.showerror('Erro','Se dados de treino ou de compare forem selecionados, o outro tambem deve ser selecionado.')
-            return
+        if not api_call:
+            execute_api_call(6)
         
-        try:
-            self.rodar_previsao(table, model,create, train,horas=hora_atual, max=num_horas)
-        except Exception as e:
-            messagebox.showerror('Erro',e)
+            if (self.x_path and not self.y_path) or (not self.x_path and self.y_path):
+                messagebox.showerror('Erro','Se dados de treino ou de compare forem selecionados, o outro tambem deve ser selecionado.')
+                return
+            
+            try:
+                self.rodar_previsao(table, model,create, train,horas=hora_atual, max=num_horas)
+            except Exception as e:
+                messagebox.showerror('Erro',e)
         
         self.load_data(True)
         
+        metrics_dict['mae_home'].set(self.df_metrics.loc[0, 'MAE_Casa'])
+        metrics_dict['r2_home'].set(self.df_metrics.loc[0, 'R2_Casa'])
+        metrics_dict['mae_away'].set(self.df_metrics.loc[0, 'MAE_Visitante'])
+        metrics_dict['r2_away'].set(self.df_metrics.loc[0, 'R2_Visitante'])
+        data = self.get_future_api()
         for mercado, tree_frame in market_frames.items():
             for widget in tree_frame.winfo_children():
                 widget.destroy()
@@ -161,13 +171,19 @@ class Service:
             scroll_y.config(command=tree.yview)
             scroll_x.config(command=tree.xview)
             if mercado == "EURO":
-                self.populate_treeview(tree, self.df_euro,scroll_y,scroll_x)
+                euro_df = self.filter_pred(data, self.df_euro, 1)
+                self.populate_treeview(tree, euro_df,scroll_y,scroll_x)
             if mercado == "COPA":
-                self.populate_treeview(tree, self.df_copa,scroll_y,scroll_x)
+                copa_df = self.filter_pred(data, self.df_copa, 2)
+                self.populate_treeview(tree, copa_df,scroll_y,scroll_x)
             if mercado == "SUPER":
-                self.populate_treeview(tree, self.df_supreme,scroll_y,scroll_x)
+                super_df = self.filter_pred(data, self.df_supreme, 4)
+                
+                self.populate_treeview(tree, super_df,scroll_y,scroll_x)
             if mercado == "PREMIER":
-                self.populate_treeview(tree, self.df_premier,scroll_y,scroll_x)
+                premier_df = self.filter_pred(data, self.df_premier, 3)
+                
+                self.populate_treeview(tree, premier_df,scroll_y,scroll_x)
             # elif mercado == "UNDER 1.5":
             #     df_filtrado = self.filter_over25(df=df_filtrado)
             #     self.populate_treeview(tree, df_filtrado,scroll_y,scroll_x)
@@ -233,9 +249,70 @@ class Service:
         scroll_y.grid(row=0, column=1, sticky="ns")
         scroll_x.grid(row=1, column=0, sticky="ew")
 
-                
+    def get_future_api(self):
+        print('Getting Future Api')
+        
+        data = getFutureData()
+        return data
+        
+    def filter_pred(self, data, df, num):
+        print('Filtering Pred For Future')
+        
+        current_data = data[f'liga_{num}']
+        
+        date = datetime.strptime(current_data['DataAtualizacao'], "%Y-%m-%dT%H:%M:%S.%f")
+        
+        hours = self.generate_full_times()
+        cur_h = []
+        cur_m = []
+        for h in hours:
+            hh = h.hour
+            mm = h.minute
+            cur_h.append(hh)
+            cur_m.append(mm)
+        current_list = []
+        for linha in current_data['Linhas']:
+            for coluna in linha['Colunas']:
+                if 'TimeA' in coluna and 'TimeB' in coluna and 'Hora' in coluna and (int(coluna['Minuto']) in (cur_m)) and (int(coluna['Hora']) in cur_h):
+                    current_list.append({'teamA':coluna['TimeA'],'teamB':coluna['TimeB'], 'Hora':coluna['Hora'], 'Minuto':coluna['Minuto']})
+                    
+        print(current_list)
+        filtered_df = df
+        # filtered_df = filtered_df[(filtered_df['HORA'].isin(current_hours))]
+        # filtered_df = filtered_df[(filtered_df['COLUNA'].isin(current_minutes))]
+        results = []
+        for match in current_list:
+            match_df = filtered_df[
+                (filtered_df['Time_Casa'] == match['teamA']) & 
+                (filtered_df['Time_Contra'] == match['teamB'])&
+                (filtered_df['HORA'].astype(int) == int(match['Hora'])) & 
+                (filtered_df['COLUNA'].astype(int) == int(match['Minuto']))
+            ]
+            results.append(match_df)
 
+        filtered_df = pd.concat(results)
+        return filtered_df
+    def generate_minute_sequence(self):
+        current_minute = datetime.now().minute
+        sequence = []
+        
+        for i in range(17):  # Current minute + next 16 minutes
+            minute = (current_minute + i) % 60
+            sequence.append(minute)
+        
+        return sequence
 
+    def generate_full_times(self):
+        """Generate complete HH:MM format times"""
+        now = datetime.now()
+        hours = []
+        
+        for i in range(17):
+            
+            hours.append(datetime.now()+timedelta(hours=4) + timedelta(minutes=i))
+        hours = list(set(hours))
+        
+        return hours
     # Specific filter functions
     def filter_over25(self,tree, df, hora_atual=0, num_horas=24):
         # Your filtering logic here
@@ -378,7 +455,7 @@ class Service:
         self.df_copa = pd.read_csv(self.get_most_recent_file('Copa', 'csv'))
         self.df_premier = pd.read_csv(self.get_most_recent_file('Premier', 'csv'))
         self.df_supreme = pd.read_csv(self.get_most_recent_file('Super', 'csv'))
-        
+        self.df_metrics = pd.read_csv('app\\generated\\metrics.csv')
         
     def carregar_previsoes(self):
         try:
